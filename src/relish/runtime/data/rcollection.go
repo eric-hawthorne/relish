@@ -19,6 +19,7 @@ import (
 	"time"
 	"sync"
 	"strings"
+    "net/http"
 )
 
 const MAX_CARDINALITY = 999999999999999999 // Replace with highest int64?
@@ -2594,4 +2595,8 @@ func (f FakeInterpreterThread) Transaction() *RTransaction {
 }
 
 func (f FakeInterpreterThread) SetTransaction(tx *RTransaction) {
+}
+
+func (f FakeInterpreterThread) HttpClient() *http.Client {
+	return nil
 }

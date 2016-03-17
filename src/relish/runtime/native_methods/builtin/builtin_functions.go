@@ -25,7 +25,6 @@ import (
 	"bufio"
 	"net/smtp"
 	"util/smtp_util"
-	"net/http"
 	"net/url"	
 	"io/ioutil"
 	"encoding/csv"
@@ -319,6 +318,16 @@ func InitBuiltinFunctions(relishRoot string) {
 	}
 	httpGetMethod.PrimitiveCode = builtinHttpGet
 
+    // httpGet url String timeoutSeconds Int > responseBody String err String
+    //
+    //
+	httpGet2Method, err := RT.CreateMethod("relish/pkg/http",nil,"httpGet", []string{"url","timeoutSeconds"}, []string{"String","Int"}, []string{"String","String"}, false, 0, false)
+	if err != nil {
+		panic(err)
+	}
+	httpGet2Method.PrimitiveCode = builtinHttpGet
+
+
     // httpPost 
     //    url String 
     //    keysVals {} String > [] String
@@ -331,6 +340,21 @@ func InitBuiltinFunctions(relishRoot string) {
 		panic(err)
 	}
 	httpPostMethod.PrimitiveCode = builtinHttpPost
+
+    // httpPost 
+    //    url String 
+    //    keysVals {} String > [] String
+    //    timeoutSeconds Int
+    // > 
+    //    responseBody String 
+    //    err String
+    //
+	httpPost2Method, err := RT.CreateMethod("relish/pkg/http",nil,"httpPost", []string{"url","keysVals","timeoutSeconds"}, []string{"String","Map","Int"}, []string{"String","String"}, false, 0, false)
+	if err != nil {
+		panic(err)
+	}
+	httpPost2Method.PrimitiveCode = builtinHttpPost
+
 
 	// httpPost 
 	//    url String 
@@ -347,6 +371,42 @@ func InitBuiltinFunctions(relishRoot string) {
 		panic(err)
 	}
 	httpPost3Method.PrimitiveCode = builtinHttpPost
+
+
+	// httpPost 
+	//    url String 
+	//    mimeType String
+	//    bodyContentToPost String
+	//    timeoutSeconds Int
+	// > 
+	//    responseBody String 
+	//    err String
+	// """
+	//  Posts the data with the specified mime type as the Content-type: header. 
+	// """	
+	httpPost4Method, err := RT.CreateMethod("relish/pkg/http",nil,"httpPost", []string{"url","mimeType","bodyContent","timeoutSeconds"}, []string{"String","String","String","Int"}, []string{"String","String"}, false, 0, false)
+	if err != nil {
+		panic(err)
+	}
+	httpPost4Method.PrimitiveCode = builtinHttpPost
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 	// csvRead
@@ -5685,15 +5745,31 @@ func builtinSendEmail(th InterpreterThread, objects []RObject) []RObject {
 
 // httpGet url String > responseBody String err String
 //
+// or httpGet url String timeoutSeconds Int
+//
+// timeoutSeconds, which defaults to 60 if not supplied, is the time that will be waited
+// until the first response header records come back to the client. This time includes
+// connection establishment, TLS negotiation, and redirects.
+//
 //
 func builtinHttpGet(th InterpreterThread, objects []RObject) []RObject {
 	
 	urlStr := string(objects[0].(String))
+
+    var timeoutNanos time.Duration = time.Minute
+
+	if len(objects) > 1 {
+       timeoutSeconds := int(objects[1].(Int))
+       timeoutNanos = time.Duration(timeoutSeconds) * time.Second
+	}
 	
     contentStr := ""
     errStr := ""
 
-	res, err := http.Get(urlStr)
+    client := th.HttpClient()
+    client.Timeout = timeoutNanos
+
+	res, err := client.Get(urlStr)
 	if err != nil {
 		errStr = err.Error()
 	} else {
@@ -5733,14 +5809,61 @@ func builtinHttpGet(th InterpreterThread, objects []RObject) []RObject {
 //  Posts the data with the specified mime type as the Content-type: header. 
 // """
 //
+//
+// httpPost 
+//    url String 
+//    keysVals {} String > Any
+//    timeoutSeconds Int
+// > 
+//    responseBody String 
+//    err String
+// """
+//  The keysVals map should be a map from String to (value or collection of values)
+//  The values are converted to their default String representation to be used as
+//  http post argument values.
+// """
+//
+//
+// httpPost 
+//    url String 
+//    mimeType String
+//    bodyContentToPost String
+//    timeoutSeconds Int
+// > 
+//    responseBody String 
+//    err String
+// """
+//  Posts the data with the specified mime type as the Content-type: header. 
+// """
+
+//
 func builtinHttpPost(th InterpreterThread, objects []RObject) []RObject {
+
+    var timeoutNanos time.Duration = time.Minute
 
     contentStr := ""
     errStr := ""
 
 	urlStr := string(objects[0].(String))
 
-	if len(objects) == 2 {  // 2nd arg is a map of form-input keys-values
+    hasArgumentsMap := true
+
+    switch len(objects) {
+    case 2:
+    case 3:
+    	timeoutInt, isInt := objects[2].(Int)
+    	if isInt {
+    		timeoutSeconds := int(timeoutInt)
+            timeoutNanos = time.Duration(timeoutSeconds) * time.Second
+    	} else {
+    		hasArgumentsMap = false
+    	}
+    case 4:
+    	hasArgumentsMap = false
+        timeoutSeconds := int(objects[3].(Int))
+        timeoutNanos = time.Duration(timeoutSeconds) * time.Second
+    }
+	if hasArgumentsMap {  // 2nd arg is a map of form-input keys-values
 
 		theMap := objects[1].(Map)
 		
@@ -5759,7 +5882,10 @@ func builtinHttpPost(th InterpreterThread, objects []RObject) []RObject {
 		   }
 	    }
 
-		res, err := http.PostForm(urlStr, values)
+        client := th.HttpClient()
+        client.Timeout = timeoutNanos
+
+		res, err := client.PostForm(urlStr, values)
 		if err != nil {
 			errStr = err.Error()
 		} else {
@@ -5770,7 +5896,8 @@ func builtinHttpPost(th InterpreterThread, objects []RObject) []RObject {
 			}
 			contentStr = string(content)
 	    }	
-    } else { // 3 arguments supplied - posting raw content with mime-type identified
+    } else {  // httpPost url mimeType bodyContentToPost [timeoutSeconds]
+              // - posting raw content with mime-type identified
 
         // For now we only handle a String as argument.
         // Later should handle a [] Byte too.
@@ -5779,7 +5906,11 @@ func builtinHttpPost(th InterpreterThread, objects []RObject) []RObject {
         bodyContentToPost := string(objects[2].(String))
 
         stringReader := strings.NewReader(bodyContentToPost) 
-		res, err := http.Post(urlStr, bodyMimeType, stringReader)
+
+        client := th.HttpClient()
+        client.Timeout = timeoutNanos
+
+		res, err := client.Post(urlStr, bodyMimeType, stringReader)
 		if err != nil {
 			errStr = err.Error()
 		} else {

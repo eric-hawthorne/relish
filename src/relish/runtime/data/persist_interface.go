@@ -9,7 +9,10 @@ package data
 /*
    persist_interface.go -  Abstraction of persistence service for relish data.
 */
-   
+
+import (
+      "net/http"
+   )   
 
 type StatementGroup struct {
 	Statements []*SqlStatement
@@ -329,6 +332,12 @@ type InterpreterThread interface {
 
   SetTransaction(tx *RTransaction)
 
+  /*
+  Creates if necessary and returns an http client unique to this thread.
+  One client per thead means that the client's Timeout parameter etc
+  can be set independently of uses of an http client by a different thread.
+  */
+  HttpClient() *http.Client
 }
 
 

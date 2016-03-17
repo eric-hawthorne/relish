@@ -16,6 +16,7 @@ import (
 	. "relish/dbg"
 	. "relish/runtime/data"
 	"errors"
+	"net/http"
 )
 
 
@@ -113,6 +114,8 @@ type Thread struct {
 	                   // If positive, means this thread will keep holding an RLock on GCMutex and decrementing counter
 
 	transaction *RTransaction
+
+	httpClient *http.Client
 }
 
 const MAX_GC_LOCKED_STACK_OPS = 100  // Do this many pops and pushes before relinquishing RLock on GCMutex.
@@ -506,4 +509,9 @@ func (t *Thread) SetTransaction(tx *RTransaction) {
 	t.transaction = tx
 }
 
-
+func (t *Thread) HttpClient() *http.Client {
+	if t.httpClient == nil {
+		t.httpClient = &http.Client{}
+	}
+	return t.httpClient
+}
