@@ -21,15 +21,13 @@ Steps for Linux and Apple Mac
    sudo apt-get install build-essential 
    will install gcc if "which gcc" reveals it does not exist on your platform.   
 
-3. Install mercurial version control system on your machine if not already installed.
-
-   A binary for MacOSX is available at http://mercurial.selenic.com/downloads/
+3. Install git version control system on your machine if not already installed.
    
-   or for linux:
+   For linux:
    
-   aptitude show mercurial
+   aptitude show git
    ...and if State: not installed...   
-   sudo apt-get install mercurial
+   sudo apt-get install git
 
    or equivalent package installation procedure on your linux distribution.
 
@@ -56,7 +54,7 @@ Steps for Linux and Apple Mac
    sudo chmod go+w devel   
    cd devel   
 
-6. hg clone https://code.google.com/p/relish/ 
+6.  git clone https://github.com/eric-hawthorne/relish.git
 
    Note that the repository directory that you are developing in and running relish tools from must be called relish.
    If you want to have multiple clones, you can clone them into e.g. relish_mybranch then
@@ -77,7 +75,7 @@ Steps for Linux and Apple Mac
 
 9. Install the go-sqlite package into the Go environment.
 
-   go get code.google.com/p/go-sqlite/go1/sqlite3    
+   go get github.com/mxk/go-sqlite/sqlite3   
 
 10. build the relish compiler-interpreter 
 
@@ -111,8 +109,7 @@ Steps for Linux and Apple Mac
 13. To get and build an updated version of relish source, cd to your /opt/devel/relish directory 
     or a subdirectory, then: 
     
-    hg pull
-    hg update
+    git pull
     go install relish/relish
     
     

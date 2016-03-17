@@ -24,7 +24,9 @@ package persist
 */
 
 import (
-	sqlite "code.google.com/p/go-sqlite/go1/sqlite3"
+  sqlite "github.com/mxk/go-sqlite/sqlite3"
+
+
 	"fmt"
 	. "relish/dbg"
 	. "relish/runtime/data"

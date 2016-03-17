@@ -128,9 +128,9 @@ relish is implemented in Go, and inherits/wraps some Go features like goroutine 
 	<h3>Source Code Distribution</h3>
 	<p>
 		The relish software project is hosted at
-	 <a href="http://code.google.com/p/relish/">https://code.google.com/p/relish/</a><br/>
-   You will need to install the mercurial version-control-system (similar to git) on your platform in order to get the relish source code.<br/>
-   On Ubuntu linux: sudo apt-get install mercurial
+	 <a href="https://github.com/eric-hawthorne/relish">https://github.com/eric-hawthorne/relish</a><br/>
+   You will need to install the git version-control-system on your platform in order to get the relish source code.<br/>
+   On Ubuntu linux: sudo apt-get install git
 	</p>
 	<p>
 		To compile the relish programming language, you will first have to install the Go programming language version 1.3 or greater (http://golang.org).<br/>
@@ -145,14 +145,15 @@ relish is implemented in Go, and inherits/wraps some Go features like goroutine 
    sudo mkdir -p /opt/devel
    sudo chmod go+wx /opt/devel
    cd /opt/devel
-   hg clone https://code.google.com/p/relish/ 
+   git clone https://github.com/eric-hawthorne/relish.git
    export GOPATH=/opt/devel/relish              # You should add this export statement to your ~/.bashrc file or
                                                 # ~/.profile file in linux, or create a ~/.bash_profile file in MACOSX 
                                                 # and edit it to contain the export statement
                                                 
    # Make sure gcc is installed before the next step 
 
-   go get code.google.com/p/go-sqlite/go1/sqlite3  
+   go get github.com/mxk/go-sqlite/sqlite3
+
    cd relish
    go install relish/relish
    sudo ./install.sh    # creates symbolic links in /usr/local/bin to /opt/devel/relish/bin/ executables 
