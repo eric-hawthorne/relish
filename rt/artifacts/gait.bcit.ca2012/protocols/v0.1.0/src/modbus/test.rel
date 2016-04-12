@@ -1,0 +1,103 @@
+origin   gait.bcit.ca2012
+artifact protocols
+package  modbus
+
+"""
+ test.rel
+
+ Tests modbus types and methods
+"""
+
+main
+"""
+ Main Program
+"""
+   testModbus
+
+
+printResponse response Bytes err String
+"""
+ Print response from modbus query
+"""
+   if err
+      print err
+   else
+      // print toInt2301 response
+      print len response
+      print toInt response
+
+      temp = slice response 0 4
+      print toInt temp
+
+      status = slice response 4
+      print toInt status
+
+   print ""
+
+
+testModbus
+"""
+ Test modbus connection and read / write methods
+"""
+   print "Test Modbus"
+
+   timeout err = Uint 5000000000
+   retries err = Uint32 3
+   print timeout
+   print retries
+
+   modbus = ModbusTcp "mode" timeout retries
+
+   residenceIp = "192.232.76.99"
+   residencePort err = Uint32 502
+   kootenaySlave err = Uint32 14  // kootenay
+   nisgaaSuitaSlave err = Uint32 5  // nisga'a suite a
+
+   err = connect modbus residenceIp residencePort nisgaaSuitaSlave
+   if err
+      print err
+   else
+      print "connected"
+
+      addrEnergy err = Uint32 137  // 40138 - 40001
+      numRegEnergy err = Uint32 2
+
+      addrPower err = Uint32 119  // 40120 - 40001
+      numRegPower err = Uint32 1
+
+      addrTemp err = Uint32 0  // 0x0000
+      numRegTemp err = Uint32 2
+
+      addrRelayStatus err = Uint32 2  // 0x0002
+      numRegRelayStatus err = Uint32 2      
+
+      numRegCombined err = Uint32 4
+
+      addrSetpointRead err = Uint32 262  // 0x0106 
+      addrSetpointWrite err = Uint32 8451  // 0x2103
+      numRegSetpoint err = Uint32 2
+
+      // READ
+      // readPdu = readHoldingRegisters modbus addrEnergy numRegEnergy
+      readPdu = readHoldingRegisters modbus addrTemp numRegCombined
+      // readPdu = readHoldingRegisters modbus addrRelayStatus numRegRelayStatus
+      // readPdu = readHoldingRegisters modbus addrSetpointRead numRegSetpoint
+
+      // WRITE
+      value err = Uint32 138
+      writePdu = writeSingleRegister modbus addrSetpointWrite value
+
+      // ENABLE / DISABLE WRITE
+      commandAddr err = Uint32 0
+      commandEnable err = Uint32 1
+      commandDisable err = Uint32 0
+      enablePdu = writeSingleRegister modbus commandAddr commandEnable
+      disablePdu = writeSingleRegister modbus commandAddr commandDisable
+
+      printResponse query modbus readPdu
+      // printResponse query modbus enablePdu
+      // printResponse query modbus writePdu
+      // printResponse query modbus disablePdu
+      // printResponse query modbus readPdu
+
+      close modbus
