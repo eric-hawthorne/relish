@@ -870,7 +870,9 @@ func (rt *RuntimeEnv) NewObject(typeName string) (RObject, error) {
     	*/
 
 	// TODO Need to handle parameterized types here
+        TypesMutex.RLock()
 	typ, found := rt.Types[typeName]
+        TypesMutex.RUnlock()
 	if !found {
 		return nil, fmt.Errorf("Type '%s' not found.", typeName)
 	}
