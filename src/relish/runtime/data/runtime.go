@@ -169,6 +169,23 @@ func (rt *RuntimeEnv) DBT() DBT {
 	return rt.dbt
 }
 
+/*
+This and the PopDBT method must be used one after the other without fail in a guaranteed serialized exclusively running section of code.
+*/
+func (rt *RuntimeEnv) PushDBT(temporaryDbt DBT) (dbt DBT) {
+   dbt = rt.dbt
+   rt.dbt = temporaryDbt 
+   return 
+}
+
+func (rt *RuntimeEnv) PopDBT(originalDbt DBT) {
+   rt.dbt = originalDbt
+}
+
+
+
+
+
 
 /*
 Creates a new constant.
@@ -607,6 +624,10 @@ func (rt *RuntimeEnv) AttrValue(th InterpreterThread, obj RObject, attr *Attribu
 		var err error
 
 		val, err = th.DBT().FetchAttribute(th, obj.DBID(), obj, attr, 0)		
+	        //Logln(PERSIST2_, "Finished FetchAttribute!")
+	        //Logln(PERSIST2_, "Finished FetchAttribute:", err)
+	        //if val != nil { Logln(PERSIST2_, val.String()) }
+                
 		// val, err = rt.db.FetchAttribute(th, obj.DBID(), obj, attr, 0)
 		if err != nil {
 			// TODO  - NOT BEING PRINCIPLED ABOUT WHAT TO DO IF NO VALUE! Should sometimes allow, sometimes not!
@@ -620,9 +641,10 @@ func (rt *RuntimeEnv) AttrValue(th InterpreterThread, obj RObject, attr *Attribu
 			}
 		}
         if val != nil {
-			Logln(PERSIST2_, "AttrVal (fetched) =", val)
+                        // THE LOGGING STATEMENT IS NOT THREAD-SAFE!!! 
+			Logln(PERSIST2_, "AttrVal (fetched) =", val.StringTh(th))
             found = true
-		}
+		} 
 	}
 
 	if val == nil && attr.Part.ArityHigh != 1 && attr.Part.CollectionType != ""  {
@@ -974,7 +996,7 @@ func (rt *RuntimeEnv) RemoveFromCollection(th InterpreterThread, collection Remo
        ensureMemoryTransactionConsistency4(th, collection)    	
     }	
 
-	removed, removedIndex := collection.Remove(val)
+	removed, removedIndex := collection.Remove(th, val)
 	
 	if removed  {
 	   if removePersistent && collection.IsBeingStored() {
@@ -1724,7 +1746,7 @@ func (rt *RuntimeEnv) RemoveFromAttr(th InterpreterThread, obj RObject, attr *At
 
 
 	collection := objColl.(RemovableMixin) // Will throw an exception if collection type does not implement Remove(..)
-	removed, removedIndex := collection.Remove(val)
+	removed, removedIndex := collection.Remove(th, val)
 
 
 

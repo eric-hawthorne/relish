@@ -415,6 +415,8 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
    defer interpreter.DeregisterThread(t)   
 
+
+   LogM(t, PERSIST2_ ,"Running dialog handler method: %s\n",handlerMethod.Name)   
    Log(GC2_,"Running dialog handler method: %s\n",handlerMethod.Name)   
    Log(GC2_," Args: %v\n",positionalArgStringValues)   
    Log(GC2_," KW Args: %v\n",keywordArgStringValues)   
@@ -1183,8 +1185,13 @@ func processTemplateResponse(w http.ResponseWriter, r *http.Request, pkg *RPacka
     responseProcessingMutex.Lock()
     thread.DisallowGC()
     defer responseProcessingMutex.Unlock()
+
+     
     responseProcessingThread = thread
     responseProcessingPackage = pkg
+
+    originalDbt := RT.PushDBT(thread.DBT())
+    defer RT.PopDBT(originalDbt)
 
     goTemplateText := goTemplate(relishTemplateText)
     Logln(WEB2_,goTemplateText)

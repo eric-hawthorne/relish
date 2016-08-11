@@ -32,6 +32,7 @@ import (
 	. "relish/runtime/data"
 	"relish/params"
   "os"
+//   "runtime/debug"
 )
 
 
@@ -81,7 +82,7 @@ Does not unlock the dbMutex or release this thread's ownership of the mutex.
 Use CommitTransaction or RollbackTransaction to do that.
 */
 func (dbt * DBThread) BeginTransaction(transactionType string) (err error) {
-   Logln(PERSIST2_,"DBThread.BeginTransaction") 	
+   LoglnM(dbt.th,PERSIST2_,"DBThread.BeginTransaction") 	
 
    if transactionType == "DEFERRED" {
        dbt.isReadOnlyTransaction = true
@@ -107,7 +108,7 @@ In the error case, the correct behaviour is to either retry the commit, do a rol
 unlock the dbMutex and release this thread's ownership of the mutex.
 */
 func (dbt * DBThread) CommitTransaction() (err error) {
-    Logln(PERSIST2_,"DBThread.CommitTransaction") 		
+    LoglnM(dbt.th,PERSIST2_,"DBThread.CommitTransaction") 		
 	err = dbt.dbti.CommitTransaction()
 	if err == nil {
 	   dbt.ReleaseDB()
@@ -141,7 +142,14 @@ for which we don't want to manually start a long-running transaction.
 This method will block until no other DBThread is using the database.
 */
 func (dbt * DBThread) UseDB() {
-   Logln(PERSIST2_,"DBThread.UseDB when ownership level is",dbt.dbLockOwnershipDepth) 		
+   LoglnM(dbt.th, PERSIST2_,"DBThread.UseDB when ownership level is",dbt.dbLockOwnershipDepth) 		
+
+   // DEBUGGING
+   // if DieInUseDB {
+   //    debug.PrintStack() 
+   //    DieInUseDB = false
+   //}
+ 
    if dbt.acquiringDbLock {  // Umm, shouldn't this be impossible? The same thread is blocked further inside this method.
       return	
    }	
@@ -162,7 +170,7 @@ func (dbt * DBThread) UseDB() {
        dbt.acquiringDbLock = false      	
    }
    dbt.dbLockOwnershipDepth++
-   Logln(PERSIST2_,"DBThread.UseDB: Set ownership level to",dbt.dbLockOwnershipDepth)    
+   LoglnM(dbt.th, PERSIST2_,"DBThread.UseDB: Set ownership level to",dbt.dbLockOwnershipDepth)    
 }
 
 /*
@@ -174,10 +182,10 @@ flag that this thread no longer owns it.
 Returns false if this thread still has an interest in and lock on the dbMutex.
 */	
 func (dbt * DBThread) ReleaseDB() bool {
-    Logln(PERSIST2_,"DBThread.ReleaseDB when ownership level is",dbt.dbLockOwnershipDepth) 		
+    LoglnM(dbt.th, PERSIST2_,"DBThread.ReleaseDB when ownership level is",dbt.dbLockOwnershipDepth) 		
     if dbt.dbLockOwnershipDepth > 0 {
 	   dbt.dbLockOwnershipDepth--
-       Logln(PERSIST2_,"DBThread.ReleaseDB: Set ownership level to",dbt.dbLockOwnershipDepth)  	
+       LoglnM(dbt.th, PERSIST2_,"DBThread.ReleaseDB: Set ownership level to",dbt.dbLockOwnershipDepth)  	
 	   if dbt.dbLockOwnershipDepth == 0 {
         dbt.db.ReleaseConnection(dbt.conn)
          
@@ -404,7 +412,9 @@ func (dbt * DBThread) Refresh(obj RObject, radius int) (err error) {
 func (dbt * DBThread) FetchAttribute(th InterpreterThread, objId int64, obj RObject, attr *AttributeSpec, radius int) (val RObject, err error) {
    dbt.UseDB()
    val, err = dbt.dbti.FetchAttribute(th, objId, obj, attr, radius)
+   Logln(PERSIST2_,"Just before dbt.ReleaseDB() in FetchAttribute") 	
    dbt.ReleaseDB()  
+   Logln(PERSIST2_,"Just after dbt.ReleaseDB() in FetchAttribute") 	
    return 
 }
 

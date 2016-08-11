@@ -469,6 +469,10 @@ func (p Channel) IsCollection() bool {
 }
 
 func (p Channel) String() string {
+   return p.StringTh(nil)
+} 
+
+func (p Channel) StringTh(th InterpreterThread) string {
 	var descriptor string
 	if p.Ch == nil {
 		descriptor = "uninitialized"
@@ -480,8 +484,8 @@ func (p Channel) String() string {
 	return fmt.Sprintf("Channel (%s) of %v", descriptor, p.ElementType)
 }
 
-func (p Channel) Debug() string {
-	return p.String()
+func (p Channel) Debug(th InterpreterThread) string {
+	return p.StringTh(th)
 }
 
 func (p Channel) Length() int64 {
@@ -667,6 +671,10 @@ func (p TimeChannel) IsCollection() bool {
 }
 
 func (p TimeChannel) String() string {
+   return p.StringTh(nil)
+}
+
+func (p TimeChannel) StringTh(th InterpreterThread) string {
 	var descriptor string
 	if p.Ch == nil {
 		descriptor = "uninitialized"
@@ -678,8 +686,8 @@ func (p TimeChannel) String() string {
 	return fmt.Sprintf(" Channel (%s) of %v", descriptor, p.ElementType)
 }
 
-func (p TimeChannel) Debug() string {
-	return p.String()
+func (p TimeChannel) Debug(th InterpreterThread) string {
+	return p.StringTh(th)
 }
 
 func (p TimeChannel) Length() int64 {
@@ -848,11 +856,15 @@ func (p Mutex) IsCollection() bool {
 }
 
 func (p Mutex) String() string {
+   return p.StringTh(nil)
+}
+
+func (p Mutex) StringTh(th InterpreterThread) string {
    return fmt.Sprintf("%v",sync.Mutex(p))
 }
 
-func (p Mutex) Debug() string {
-	return p.String()
+func (p Mutex) Debug(th InterpreterThread) string {
+	return p.StringTh(th)
 }
 
 func (p Mutex) HasUUID() bool {
@@ -1087,11 +1099,15 @@ func (p OwnedMutex) IsCollection() bool {
 }
 
 func (p OwnedMutex) String() string {
+   return p.StringTh(nil)
+}
+
+func (p OwnedMutex) StringTh(th InterpreterThread) string {
    return fmt.Sprintf("%v:%d",p.mtx,p.count)
 }
 
-func (p OwnedMutex) Debug() string {
-	return p.String()
+func (p OwnedMutex) Debug(th InterpreterThread) string {
+	return p.StringTh(th)
 }
 
 func (p OwnedMutex) HasUUID() bool {
@@ -1262,11 +1278,14 @@ func (p RWMutex) IsCollection() bool {
 }
 
 func (p RWMutex) String() string {
+   return p.StringTh(nil) 
+}
+func (p RWMutex) StringTh(th InterpreterThread) string {
    return fmt.Sprintf("%v",sync.RWMutex(p))
 }
 
-func (p RWMutex) Debug() string {
-	return p.String()
+func (p RWMutex) Debug(th InterpreterThread) string {
+	return p.StringTh(th)
 }
 
 func (p RWMutex) HasUUID() bool {
@@ -1436,11 +1455,15 @@ func (p RTime) IsCollection() bool {
 }
 
 func (p RTime) String() string {
+	return p.StringTh(nil) 
+}
+
+func (p RTime) StringTh(th InterpreterThread) string {
 	return Time(p).String() // TODO May want to change this: Formats as: "2006-01-02 15:04:05.999999999 -0700 MST"
 }
 
-func (p RTime) Debug() string {
-	return p.String()
+func (p RTime) Debug(th InterpreterThread) string {
+	return p.StringTh(th)
 }
 
 func (p RTime) HasUUID() bool {
@@ -1592,8 +1615,12 @@ func (p Int) String() string {
 	return strconv.FormatInt(int64(p),10)
 }
 
-func (p Int) Debug() string {
+func (p Int) StringTh(th InterpreterThread) string {
 	return p.String()
+}
+
+func (p Int) Debug(th InterpreterThread) string {
+	return p.StringTh(th)
 }
 
 func (p Int) HasUUID() bool {
@@ -1741,8 +1768,12 @@ func (p Int32) String() string {
 	return strconv.FormatInt(int64(p),10)
 }
 
-func (p Int32) Debug() string {
+func (p Int32) StringTh(th InterpreterThread) string {
 	return p.String()
+}
+
+func (p Int32) Debug(th InterpreterThread) string {
+	return p.StringTh(th)
 }
 
 func (p Int32) HasUUID() bool {
@@ -1890,8 +1921,12 @@ func (p Uint) String() string {
 	return strconv.FormatUint(uint64(p),10)
 }
 
-func (p Uint) Debug() string {
+func (p Uint) StringTh(th InterpreterThread) string {
 	return p.String()
+}
+
+func (p Uint) Debug(th InterpreterThread) string {
+	return p.StringTh(th)
 }
 
 func (p Uint) HasUUID() bool {
@@ -2039,8 +2074,12 @@ func (p Uint32) String() string {
 	return strconv.FormatUint(uint64(p),10)
 }
 
-func (p Uint32) Debug() string {
+func (p Uint32) StringTh(th InterpreterThread) string {
 	return p.String()
+}
+
+func (p Uint32) Debug(th InterpreterThread) string {
+	return p.StringTh(th)
 }
 
 func (p Uint32) HasUUID() bool {
@@ -2188,8 +2227,12 @@ func (p Float) String() string {
 	return strconv.FormatFloat(float64(p), 'G', -1, 64)
 }
 
-func (p Float) Debug() string {
+func (p Float) StringTh(th InterpreterThread) string {
 	return p.String()
+}
+
+func (p Float) Debug(th InterpreterThread) string {
+	return p.StringTh(th)
 }
 
 func (p Float) HasUUID() bool {
@@ -2337,8 +2380,12 @@ func (p Bool) String() string {
 	return strconv.FormatBool(bool(p))
 }
 
-func (p Bool) Debug() string {
+func (p Bool) StringTh(th InterpreterThread) string {
 	return p.String()
+}
+
+func (p Bool) Debug(th InterpreterThread) string {
+	return p.StringTh(th)
 }
 
 func (p Bool) HasUUID() bool {
@@ -2506,8 +2553,12 @@ func (p Nil) String() string {
 	return "*nil*"
 }
 
-func (p Nil) Debug() string {
-	return p.String()
+func (p Nil) StringTh(th InterpreterThread) string {
+	return "*nil*"
+}
+
+func (p Nil) Debug(th InterpreterThread) string {
+	return p.StringTh(th)
 }
 
 func (p Nil) HasUUID() bool {
@@ -2662,8 +2713,12 @@ func (p Complex) String() string {
     return fmt.Sprintf("%G",complex128(p))	
 }
 
-func (p Complex) Debug() string {
-	return p.String()
+func (p Complex) StringTh(th InterpreterThread) string {
+    return p.String()
+}
+
+func (p Complex) Debug(th InterpreterThread) string {
+	return p.StringTh(th)
 }
 
 func (p Complex) HasUUID() bool {
@@ -2811,8 +2866,12 @@ func (p Complex32) String() string {
     return fmt.Sprintf("%G",complex64(p))	
 }
 
-func (p Complex32) Debug() string {
-	return p.String()
+func (p Complex32) StringTh(th InterpreterThread) string {
+    return p.String()
+}
+
+func (p Complex32) Debug(th InterpreterThread) string {
+	return p.StringTh(th)
 }
 
 func (p Complex32) HasUUID() bool {
@@ -2982,8 +3041,12 @@ func (p String) String() string {
 	return string(p)
 }
 
-func (p String) Debug() string {
-	return p.String()
+func (p String) StringTh(th InterpreterThread) string {
+	return string(p)
+}
+
+func (p String) Debug(th InterpreterThread) string {
+	return p.StringTh(th)
 }
 
 func (p String) HasUUID() bool {
@@ -3146,9 +3209,12 @@ func (p Proxy) String() string {
 	return strconv.FormatInt(int64(p),10)
 }
 
-
-func (p Proxy) Debug() string {
+func (p Proxy) StringTh(th InterpreterThread) string {
 	return p.String()
+}
+
+func (p Proxy) Debug(th InterpreterThread) string {
+	return p.StringTh(th)
 }
 
 func (p Proxy) HasUUID() bool {
@@ -3332,12 +3398,16 @@ func (p Byte) String() string {
 	return strconv.FormatUint(uint64(p),10)
 }
 
+func (p Byte) StringTh(th InterpreterThread) string {
+	return strconv.FormatUint(uint64(p),10)
+}
+
 func (p Byte) BitString() string {
 	return fmt.Sprintf("%08b",byte(p)) 
 }
 
-func (p Byte) Debug() string {
-	return p.String()
+func (p Byte) Debug(th InterpreterThread) string {
+	return p.StringTh(th)
 }
 
 func (p Byte) HasUUID() bool {
@@ -3492,9 +3562,13 @@ func (p Bit) String() string {
 	return strconv.FormatUint(uint64(p),10)
 }
 
+func (p Bit) StringTh(th InterpreterThread) string {
+	return strconv.FormatUint(uint64(p),10)
+}
 
-func (p Bit) Debug() string {
-	return p.String()
+
+func (p Bit) Debug(th InterpreterThread) string {
+	return p.StringTh(th)
 }
 
 func (p Bit) HasUUID() bool {
@@ -3650,9 +3724,13 @@ func (p CodePoint) String() string {
 	return strconv.FormatInt(int64(p),10)
 }
 
+func (p CodePoint) StringTh(th InterpreterThread) string {
+	return strconv.FormatInt(int64(p),10)
+}
 
-func (p CodePoint) Debug() string {
-	return p.String()
+
+func (p CodePoint) Debug(th InterpreterThread) string {
+	return p.StringTh(th)
 }
 
 func (p CodePoint) HasUUID() bool {
@@ -3817,7 +3895,11 @@ func (p Bytes) String() string {
    return string(bt)
 }
 
-func (p Bytes) Debug() string {
+func (p Bytes) StringTh(th InterpreterThread) string {
+   return p.String()
+}
+
+func (p Bytes) Debug(th InterpreterThread) string {
    bt := ([]byte)(p)
    s := ""
    if len(bt) > 16 {
@@ -4037,9 +4119,12 @@ func (p *Bits) String() string {
 }
 
 
+func (p *Bits) StringTh(th InterpreterThread) string {
+   return p.String()
+}
 
-func (p *Bits) Debug() string {
-	return p.String()
+func (p *Bits) Debug(th InterpreterThread) string {
+	return p.StringTh(th)
 }
 
 func (p *Bits) HasUUID() bool {
@@ -4218,9 +4303,12 @@ func (p CodePoints) String() string {
 }
 
 
+func (p CodePoints) StringTh(th InterpreterThread) string {
+   return p.String()
+}
 
-func (p CodePoints) Debug() string {
-	return p.String()
+func (p CodePoints) Debug(th InterpreterThread) string {
+	return p.StringTh(th)
 }
 
 func (p CodePoints) HasUUID() bool {
@@ -4389,8 +4477,12 @@ func (p GoWrapper) String() string {
 	return fmt.Sprintf("%v", p.GoObj)
 }
 
-func (p GoWrapper) Debug() string {
+func (p GoWrapper) StringTh(th InterpreterThread) string {
 	return p.String()
+}
+
+func (p GoWrapper) Debug(th InterpreterThread) string {
+	return p.StringTh(th)
 }
 
 func (p GoWrapper) HasUUID() bool {

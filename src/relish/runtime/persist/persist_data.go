@@ -1411,12 +1411,12 @@ func (db *SqliteDBThread) fetch1(query string, arg interface{}, radius int, errS
       TypesMutex.RUnlock()
       if typ == nil {
    
-         fmt.Println("typeName",typeName)
+         //fmt.Println("typeName",typeName)
          pkgShortName := PackageShortName(typeName)
-         fmt.Println("pkgShortName",pkgShortName)         
+         //fmt.Println("pkgShortName",pkgShortName)         
    //      localTypeName := LocalTypeName(typeName)   
          pkgFullName := RT.PkgShortNameToName[pkgShortName]
-         fmt.Println("pkgFullName",pkgFullName)         
+         //fmt.Println("pkgFullName",pkgFullName)         
          originAndArtifact := OriginAndArtifact(pkgFullName) 
          packagePath := LocalPackagePath(pkgFullName)      
       

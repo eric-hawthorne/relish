@@ -152,7 +152,11 @@ func (p *RMultiMethod) String() string {
 	return p.Name
 }
 
-func (p *RMultiMethod) Debug() string {
+func (p *RMultiMethod) StringTh(th InterpreterThread) string {
+	return p.String()
+}
+
+func (p *RMultiMethod) Debug(th InterpreterThread) string {
 	s := fmt.Sprintf("%s.%s Exported:%v MaxArity:%v #RetArgs: %v\n", p.Pkg.ShortName, p.String(), p.IsExported, p.MaxArity, p.NumReturnArgs)
     s += "--- Methods: ---\n"  
     for arity,methods := range p.Methods {
@@ -352,8 +356,12 @@ func (m RMethod) String() string {
 	return fmt.Sprintf("%s %v %v", m.multiMethod.Name, m.ParameterNames, m.Signature)
 }
 
-func (p *RMethod) Debug() string {
-	return fmt.Sprintf("%s.%s (Multimethod: %s)", p.Pkg.ShortName, p.String(), p.multiMethod.Debug())
+func (m RMethod) StringTh(th InterpreterThread) string {
+	return m.String() 
+}
+
+func (p *RMethod) Debug(th InterpreterThread) string {
+	return fmt.Sprintf("%s.%s (Multimethod: %s)", p.Pkg.ShortName, p.StringTh(th), p.multiMethod.Debug(th))
 }
 
 func (p *RMethod) Type() *RType {
@@ -655,7 +663,7 @@ func (rt *RuntimeEnv) CreateMethodGeneral(packageName string, file *ast.File, me
                	  // This is just a merge mm, but we are now adding a new exported method to it.
                	  multiMethod.IsExported = true
                } else {
-   			      fmt.Println(multiMethod.Debug())
+   			      fmt.Println(multiMethod.Debug(nil))
 			      fmt.Println(isExported)
 		          return nil, fmt.Errorf("Method '%v' cannot be defined as private in one source code file and as exported in another.", methodName)				
 			   }
@@ -966,10 +974,14 @@ func (m RClosure) String() string {
 	return fmt.Sprintf("%v %v", m.Method.ParameterNames, m.Method.Signature)
 }
 
-func (p *RClosure) Debug() string {
-	s := p.String() + "\n"
+func (m RClosure) StringTh(th InterpreterThread) string {
+	return m.String()
+}
+
+func (p *RClosure) Debug(th InterpreterThread) string {
+	s := p.StringTh(th) + "\n"
 	for _,obj := range p.Bindings {
-		s += "   " + obj.Debug() + "\n"
+		s += "   " + obj.Debug(th) + "\n"
 	}
 	return s
 }

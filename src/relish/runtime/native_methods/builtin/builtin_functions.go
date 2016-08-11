@@ -2477,7 +2477,7 @@ func builtinPrint(th InterpreterThread, objects []RObject) []RObject {
 		case Int, Int32, Float, Bool, String:
 			fmt.Print(obj.String())
 		default:
-			fmt.Print(obj.String()) // Do something else here. TODO
+			fmt.Print(obj.StringTh(th)) 
 		}
 	}
 	fmt.Println()
@@ -2502,12 +2502,12 @@ func builtinInput(th InterpreterThread, objects []RObject) []RObject {
 }
 
 func builtinDbg(th InterpreterThread, objects []RObject) []RObject {
-   fmt.Println(objects[0].Debug())
+   fmt.Println(objects[0].Debug(th))
    return []RObject{}
 }
 
 func builtinDebug(th InterpreterThread, objects []RObject) []RObject {
-   s := objects[0].Debug()
+   s := objects[0].Debug(th)
    return []RObject{String(s)}
 }
 
@@ -4187,9 +4187,9 @@ func builtinBeginTransaction(th InterpreterThread, objects []RObject) []RObject 
 	   }
     }
 	th.AllowGC()	
-        fmt.Println("bBT1")
+        //fmt.Println("bBT1")
 	transactionMutex.Lock()
-        fmt.Println("bBT2")
+        //fmt.Println("bBT2")
 	th.DisallowGC()
 	defer transactionMutex.Unlock()
 	relish.EnsureDatabase()
@@ -4200,13 +4200,13 @@ func builtinBeginTransaction(th InterpreterThread, objects []RObject) []RObject 
     } else {
 	    transactionMutex.Unlock()    	
 
-            fmt.Println("bBT3")
+            //fmt.Println("bBT3")
 	    err := th.DBT().BeginTransaction(transactionType)
 
-            fmt.Println("bBT4")
+            //fmt.Println("bBT4")
 	    th.AllowGC()		    
 	    transactionMutex.Lock()
-            fmt.Println("bBT5")
+            //fmt.Println("bBT5")
 	    th.DisallowGC()	    	    
 		
 		if err != nil {
@@ -4253,9 +4253,9 @@ func builtinBeginLocalTransaction(th InterpreterThread, objects []RObject) []ROb
 //
 func builtinCommitTransaction(th InterpreterThread, objects []RObject) []RObject {
 	th.AllowGC()
-        fmt.Println("bCT1")
+        //fmt.Println("bCT1")
 	transactionMutex.Lock()
-        fmt.Println("bCT2")
+        //fmt.Println("bCT2")
 	th.DisallowGC()
 	defer transactionMutex.Unlock()	
 	relish.EnsureDatabase()
@@ -4264,13 +4264,13 @@ func builtinCommitTransaction(th InterpreterThread, objects []RObject) []RObject
     if th.Transaction() == nil {
     	errStr = "Cannot commit transaction. Goroutine is not participating in an active transaction."
     } else {
-            fmt.Println("bCT3")
+            //fmt.Println("bCT3")
 	    err := th.DBT().CommitTransaction()
-            fmt.Println("bCT4")
+            //fmt.Println("bCT4")
 		if err != nil {
 			errStr = err.Error()
 
-                        fmt.Println("bCT Error",errStr)
+                        //fmt.Println("bCT Error",errStr)
            rollBackErrStr := rollbackTransactionCore(th)
            if rollBackErrStr != "" {
               errStr = fmt.Sprintf("%s. Rollback also failed: %s",errStr,rollBackErrStr)
@@ -4279,13 +4279,13 @@ func builtinCommitTransaction(th InterpreterThread, objects []RObject) []RObject
               // of objects from database.
               th.Transaction().RollBack()	
               th.SetTransaction(nil)	
-              fmt.Println("bCT Rolled back with DB released.")
+              //fmt.Println("bCT Rolled back with DB released.")
            }
 		} else {  // db commit succeeded
-                   fmt.Println("bCT5")
+                   //fmt.Println("bCT5")
 		   th.Transaction().Commit()	
 		   th.SetTransaction(nil)	
-                   fmt.Println("bCT6")
+                   //fmt.Println("bCT6")
 		}	
     }
 	return []RObject{String(errStr)}
