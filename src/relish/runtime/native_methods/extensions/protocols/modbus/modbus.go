@@ -15,6 +15,7 @@ type Modbus interface {
 	WriteSingleRegister(addr uint32, value uint16) []byte
 	Diagnostic(value int32) []byte
 	Send(pdu []byte) (err error)
+        RepairConnection() (err error)
 	Read() (response []byte, err error)
 }
 
@@ -36,6 +37,7 @@ const SIZEOF_MODBUS_REGISTER = 2
 
 const (
 	NO_CONNECTION      = "No connection established."
+	CONNECTION_DEAD    = "Connection EOF or invalid."
 	ERR_TRANSACTION_ID = "Transaction ID mismatched."
 	ERR_SLAVE_ADDR     = "Incorrect slave address."
 	ERR_READ_TIMEOUT   = "Timed out during read attempt."
@@ -86,10 +88,33 @@ func Query(mb Modbus, command []byte) (response []byte, err error) {
 	//fmt.Println ("=====")
 	err = mb.Send(command)
 	if err != nil {
-		return
+           if err.Error() == CONNECTION_DEAD {
+              err2 := mb.RepairConnection()
+              if err2 == nil { 
+	          err = mb.Send(command)
+              }
+              if err != nil {
+                  return
+              }
+           } else { 
+	      return
+           }
 	}
 
 	response, err = mb.Read()
+        if err != nil {
+           if err.Error() == CONNECTION_DEAD || err.Error() == ERR_READ_TIMEOUT {
+               err2 := mb.RepairConnection()
+               if err2 == nil { 
+	          err = mb.Send(command)
+                  if err != nil {
+                      return
+                  }
+	          response, err = mb.Read()
+               }
+           }
+        }
+        
 
 	if len(response) > 0 {
 		functionCode := uint32(response[0])

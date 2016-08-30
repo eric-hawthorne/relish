@@ -8,7 +8,8 @@ import (
 	"errors"
 	"fmt"
 	"net"
-
+        "io"
+        "syscall"
 	"strconv"
 	"sync"
 )
@@ -105,6 +106,31 @@ func (mTCP *ModbusTCP) Connect(ipAddr string, port uint32, slaveAddr uint32) (er
 	return
 }
 
+
+/*
+Applicable only to kept-alive connections.
+Assumes the connection is dead in some way. 
+Attempts a close on the connection and an opening of a new tcp connection.
+*/
+func (mTCP *ModbusTCP) RepairConnection() (err error) {
+    openConnectionMutex.Lock()	
+    defer openConnectionMutex.Unlock()
+    mTCP.tcpConn.Close() // can fail
+    var connection net.Conn
+    connection, err = net.Dial("tcp", mTCP.ipAddrAndPort)
+    if err != nil {
+        return
+    }
+
+    if useKeptAliveConnection[mTCP.ipAddrAndPort] {
+       delete(openTcpConnections,mTCP.ipAddrAndPort)
+       openTcpConnections[mTCP.ipAddrAndPort] = connection
+    }
+    mTCP.tcpConn = connection
+    return
+}
+
+
 /*
    Closes the TCP connection.
    WARNING. Do not call this if your ModbusTCP is using a shared open (kept-alive) TCP connection.
@@ -159,6 +185,9 @@ func (mTCP *ModbusTCP) Send(pdu []byte) (err error) {
 	fmt.Printf("Sent %x, %v bytes sent.", message, n)
 	if err != nil {
 		fmt.Println( "Error:", err )
+		if err == io.EOF || err == syscall.EINVAL {
+                   err = errors.New(CONNECTION_DEAD)
+                }
 	} else  {
 		fmt.Println( "" )
 	}
@@ -193,7 +222,9 @@ func (mTCP *ModbusTCP) Read() (response []byte, err error) {
 	if err != nil {
 		if timeoutErr, ok := err.(net.Error); ok && timeoutErr.Timeout() {
 			err = errors.New(ERR_READ_TIMEOUT)
-		}
+		} else if err == io.EOF || err == syscall.EINVAL {
+                        err = errors.New(CONNECTION_DEAD)
+                }
 		return
 	} else {
 
@@ -226,7 +257,7 @@ func (mTCP *ModbusTCP) Read() (response []byte, err error) {
 			// Read modbus response
 			_, err = mTCP.tcpConn.Read(response)
 			if err == nil {
-				fmt.Printf("Recevied %x\n", response)
+				fmt.Printf("Received %x\n", response)
 				break
 			}
 		}
@@ -234,7 +265,9 @@ func (mTCP *ModbusTCP) Read() (response []byte, err error) {
 		if err != nil {
 			if timeoutErr, ok := err.(net.Error); ok && timeoutErr.Timeout() {
 				err = errors.New(ERR_READ_TIMEOUT)
-			}
+		        } else if err == io.EOF || err == syscall.EINVAL {
+                           err = errors.New(CONNECTION_DEAD)
+                        }
 		}
 	}
 
