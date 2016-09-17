@@ -1551,7 +1551,14 @@ Convert a relish template action to a Go template action.
 */
 func goTemplateAction(b []byte, relishAction string) string {
 
-
+	// Do not convert a template action which is a simple assignment of a string to a variable.
+	if strings.Index(relishAction,":= `") != -1 || 
+           strings.Index(relishAction, `:= "`) != -1 ||
+           strings.Index(relishAction, ":=`") != -1 ||
+           strings.Index(relishAction, `:="`) != -1 {
+		return relishAction
+	}
+       
 	buf := bytes.NewBuffer(b)
     copyStart := 0
 
