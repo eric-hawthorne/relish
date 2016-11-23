@@ -899,7 +899,7 @@ func (i *Interpreter) EvalSelectorExpr(t *Thread, selector *ast.SelectorExpr) {
 	
 	attr, found := obj.Type().GetAttribute(selector.Sel.Name)
 	if ! found {
-       rterr.Stopf1(t,selector,"Attribute or relation %s not found in type %v or supertypes.", selector.Sel.Name, obj.Type())
+       rterr.Stopf1(t,selector,"Attribute or relation '%s' not found in type '%v' or supertypes.", selector.Sel.Name, obj.Type())
     }
 	
 	val, found := RT.AttrVal(t, obj, attr)

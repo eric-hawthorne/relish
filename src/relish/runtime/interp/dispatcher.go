@@ -78,7 +78,7 @@ type dispatcher struct {
 }
 
 func newDispatcher(rt *RuntimeEnv) (d *dispatcher) {
-   emptyTypeTuple := rt.TypeTupleTrees[0].GetTypeTuple([]RObject{})
+   emptyTypeTuple := rt.TypeTupleTrees[0].GetTypeTuple(nil, []RObject{})
    d =  &dispatcher{rt.TypeTupleTrees, emptyTypeTuple}
    
    return
@@ -113,7 +113,7 @@ var dispatchMutex sync.Mutex
 */
 func (d *dispatcher) GetMethod(mm *RMultiMethod, args []RObject) (*RMethod,*RTypeTuple) {
    dispatchMutex.Lock()
-   typeTuple := d.typeTupleTrees[len(args)].GetTypeTuple(args)
+   typeTuple := d.typeTupleTrees[len(args)].GetTypeTuple(mm,args)
    method,found := mm.CachedMethods[typeTuple]
    if !found {
       method = d.dynamicDispatch(mm,typeTuple)

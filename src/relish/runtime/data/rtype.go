@@ -1586,7 +1586,7 @@ type TypeTupleTreeNode struct {
              T4
 
 */
-func (tttn *TypeTupleTreeNode) GetTypeTuple(mObjects []RObject) *RTypeTuple {
+func (tttn *TypeTupleTreeNode) GetTypeTuple(mm *RMultiMethod, mObjects []RObject) *RTypeTuple {
    // fmt.Println("===GetTypeTuple===")
    var typ *RType
    m := len(mObjects)
@@ -1601,7 +1601,7 @@ func (tttn *TypeTupleTreeNode) GetTypeTuple(mObjects []RObject) *RTypeTuple {
    if m > 0 {
       obj := mObjects[0]
 	  if obj == nil {
-        errMsg := fmt.Sprintf("Argument %v is uninitialized.\nMethod Call Arguments:\n",1);
+        errMsg := fmt.Sprintf("Multimethod '%s' Argument %v is uninitialized.\nMethod Call Arguments:\n",mm, 1);
 
 		//fmt.Println("len mObjects = ",len(mObjects),"i =",i )			
         for j, ob := range mObjects {
@@ -1616,7 +1616,7 @@ func (tttn *TypeTupleTreeNode) GetTypeTuple(mObjects []RObject) *RTypeTuple {
          for i := 1; i < m; i++ {
             obj := mObjects[i]
 		    if obj == nil {
-	           errMsg := fmt.Sprintf("Argument %v is uninitialized.\nMethod Call Arguments:\n",i+1);
+	           errMsg := fmt.Sprintf("Multimethod '%s' Argument %v is uninitialized.\nMethod Call Arguments:\n", mm, i+1);
 
 			   //fmt.Println("len mObjects = ",len(mObjects),"i =",i )			
 	           for j, ob := range mObjects {

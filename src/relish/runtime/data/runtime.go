@@ -647,7 +647,7 @@ func (rt *RuntimeEnv) AttrValByName(th InterpreterThread, obj RObject, attrName 
 
 	attr, found := obj.Type().GetAttribute(attrName)
 	if ! found {
-       err = fmt.Errorf("Attribute or relation %s not found in type %v or supertypes.", attrName, obj.Type())		
+       err = fmt.Errorf("Attribute or relation '%s' not found in type '%v' or supertypes.", attrName, obj.Type())		
 	   return	
 	}	
 	val, _ = RT.AttrVal(th, obj, attr)
