@@ -17,10 +17,14 @@ import (
 	. "relish/runtime/data"
 	"errors"
 	"net/http"
+        "sync"
 )
 
 
 const DEFAULT_STACK_DEPTH = 50 // DEFAULT INITIAL STACK DEPTH PER THREAD - stack grows as needed
+
+// egh added Aug 5 2016
+var threadManagementMutex sync.Mutex
 
 /*
 If parent is nil, something else must take care of initializing 
@@ -28,6 +32,9 @@ the ExecutingMethod and ExecutingPackage attributes of the new thread.
 */
 func (i *Interpreter) NewThread(parent *Thread) *Thread {
 	defer UnM(parent,TraceM(parent,INTERP_TR, "NewThread"))
+        threadManagementMutex.Lock() // egh added Aug 5 2016
+        defer threadManagementMutex.Unlock() // egh added Aug 5 2016
+
 	return newThread(DEFAULT_STACK_DEPTH, i, parent)
 }
 
@@ -70,6 +77,12 @@ Remember to call this when thread execution is done!
 */
 func (i *Interpreter) DeregisterThread(t *Thread) {
     LoglnM(t, GC3_, "DeregisterThread(")
+
+    threadManagementMutex.Lock() // egh added Aug 5 2016
+    defer threadManagementMutex.Unlock() // egh added Aug 5 2016
+
+
+
     // fmt.Println("DeregisterThread")
 	delete(i.threads,t)
     RemoveContext(t) 	

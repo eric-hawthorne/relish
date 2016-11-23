@@ -11,7 +11,7 @@
 // To change what will be printed out by -log 1, set below, as shown in examples
 // const SOME_DEBUG_FLAGS = some flag constants bit-OR'ed together  
 // 
-// To change what will be printed out by -log 1, set below, as shown in examples
+// To change what will be printed out by -log 2, set below, as shown in examples
 // const FULL_DEBUG_FLAGS = SOME_DEBUG_FLAGS | some more flag constants bit-OR'ed together  
 //
 // then 
@@ -237,6 +237,12 @@ func LogM(context interface{}, flags uint64,s string,args ...interface{}) {
 
    if flags & DEBUG_FLAGS != 0 {
       LogMutex.Lock()		
+      indnt,found := indents[context]
+      if ! found {
+            indents[context] = indnt	
+            currentThreadNum++
+            threadNums[context] = currentThreadNum
+      }	
       printDots(threadNums[context],indents[context])		
       fmt.Printf(s,args...)
       LogMutex.Unlock()
@@ -250,6 +256,14 @@ func LoglnM(context interface{}, flags uint64,s ...interface{}) {
 
    if flags & DEBUG_FLAGS != 0 {
       LogMutex.Lock()		
+
+      indnt,found := indents[context]
+      if ! found {
+            indents[context] = indnt	
+            currentThreadNum++
+            threadNums[context] = currentThreadNum
+      }	
+
       printDots(threadNums[context],indents[context])		
       fmt.Println(s...)
       LogMutex.Unlock()
@@ -260,7 +274,7 @@ func LoglnM(context interface{}, flags uint64,s ...interface{}) {
 // The message might be a Go method name and args some of the arguments passed
 // to it.
 // Used to trace execution of the multi-threaded relish interpreter. 
-// See Un() function below.
+// See UnM() function below.
 func TraceM(context interface{}, flags uint64, msg string, args ...interface{}) string {
 	if flags & DEBUG_FLAGS != 0 {
        LogMutex.Lock()		

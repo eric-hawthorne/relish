@@ -415,6 +415,8 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
    defer interpreter.DeregisterThread(t)   
 
+
+   LogM(t, PERSIST2_ ,"Running dialog handler method: %s\n",handlerMethod.Name)   
    Log(GC2_,"Running dialog handler method: %s\n",handlerMethod.Name)   
    Log(GC2_," Args: %v\n",positionalArgStringValues)   
    Log(GC2_," KW Args: %v\n",keywordArgStringValues)   
@@ -1183,8 +1185,13 @@ func processTemplateResponse(w http.ResponseWriter, r *http.Request, pkg *RPacka
     responseProcessingMutex.Lock()
     thread.DisallowGC()
     defer responseProcessingMutex.Unlock()
+
+     
     responseProcessingThread = thread
     responseProcessingPackage = pkg
+
+    originalDbt := RT.PushDBT(thread.DBT())
+    defer RT.PopDBT(originalDbt)
 
     goTemplateText := goTemplate(relishTemplateText)
     Logln(WEB2_,goTemplateText)
@@ -1544,7 +1551,14 @@ Convert a relish template action to a Go template action.
 */
 func goTemplateAction(b []byte, relishAction string) string {
 
-
+	// Do not convert a template action which is a simple assignment of a string to a variable.
+	if strings.Index(relishAction,":= `") != -1 || 
+           strings.Index(relishAction, `:= "`) != -1 ||
+           strings.Index(relishAction, ":=`") != -1 ||
+           strings.Index(relishAction, `:="`) != -1 {
+		return relishAction
+	}
+       
 	buf := bytes.NewBuffer(b)
     copyStart := 0
 

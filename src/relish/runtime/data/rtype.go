@@ -20,6 +20,7 @@ import (
 	. "relish/defs"	
 	"sort"
 	"relish/runtime/native_types"
+        "sync"
 )
 
 ///////////////////////////////////////////////////////////////////////////
@@ -64,7 +65,7 @@ type RType struct {
 }
 
 
-
+var TypesMutex sync.RWMutex
 
 /*
    Returns true iff t is a strict subtype of t2.
@@ -994,12 +995,14 @@ func (rt *RuntimeEnv) ListTypes() {
 func (rt *RuntimeEnv) GetSetType(elementType *RType) (typ *RType, err error) {
 	typeName := "Set_of_" + elementType.Name
 	typeShortName := "Set_of_" + elementType.ShortName()	
+        TypesMutex.Lock()
 	typ, found := rt.Types[typeName]
 	if !found {
 		typ, err = rt.CreateType(typeName, typeShortName, []string{"Set"})
 		typ.IsParameterized = true
 		typ.SetElementType(elementType)		
 	}
+        TypesMutex.Unlock()
 	return
 }
 
@@ -1010,12 +1013,14 @@ func (rt *RuntimeEnv) GetSetType(elementType *RType) (typ *RType, err error) {
 func (rt *RuntimeEnv) GetListType(elementType *RType) (typ *RType, err error) {
 	typeName := "List_of_" + elementType.Name
 	typeShortName := "List_of_" + elementType.ShortName()
+        TypesMutex.Lock()
 	typ, found := rt.Types[typeName]
 	if !found {
 		typ, err = rt.CreateType(typeName, typeShortName, []string{"List"})
 		typ.IsParameterized = true		
 		typ.SetElementType(elementType)
 	}
+        TypesMutex.Unlock()
 	return
 }
 
@@ -1026,12 +1031,14 @@ func (rt *RuntimeEnv) GetListType(elementType *RType) (typ *RType, err error) {
 func (rt *RuntimeEnv) GetMapType(keyType *RType, valType *RType) (typ *RType, err error) {
 	typeName := "Map_of_(" + keyType.Name + ")=>(" + valType.Name + ")"
 	typeShortName := "Map_of_(" + keyType.ShortName() + ")=>(" + valType.ShortName() + ")"
+        TypesMutex.Lock()
 	typ, found := rt.Types[typeName]
 	if !found {
 		typ, err = rt.CreateType(typeName, typeShortName, []string{"Map"})
 		typ.IsParameterized = true		
 		typ.SetKeyAndValTypes(keyType,valType)		
 	}
+        TypesMutex.Unlock()
 	return
 }
 

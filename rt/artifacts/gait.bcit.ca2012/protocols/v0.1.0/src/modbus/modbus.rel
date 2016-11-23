@@ -1,0 +1,28 @@
+origin   gait.bcit.ca2012
+artifact protocols
+package  modbus
+
+""" 
+ modbus.rel
+
+ Implements the Modbus communication protocol.
+ Defines the Modbus and ModbusTcp types. These types have native Go constructors and methods.
+"""
+
+
+Modbus
+"""
+ A Generic Modbus protocol handler.
+ The only concrete (instantiable) subtype currently is ModbusTcp
+ Another ModbusRtu subtype might be created later to implement the serial-comms suitable
+ variant of Modbus protocol.
+"""
+
+
+ModbusTcp <: Modbus
+"""
+ This is a natively implemented type, so it is listed in the 
+ relish/runtime/native_types/NativeType map
+ and has a GoWrapper as its instance, which has a pointer to 
+ a Go object (a relish/runtime/native_methods/extensions/modbus_methods/ModbusTcp object).
+""" 

@@ -1,0 +1,8 @@
+relish artifact metadata: 2013/09/25
+origin: gait.bcit.ca2012
+artifact: protocols
+current version: 0.1.0
+release date: 2013/07/10  
+tags: library,communications,data communications,scada,industrial controls
+
+Implementations of various communication protocols. First implemented one is Modbus.

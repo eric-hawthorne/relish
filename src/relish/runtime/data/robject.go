@@ -69,9 +69,16 @@ type RObject interface {
 	String() string
 
     /*
+    A basic string representation of the object.
+    This variant allows the object or its sub-parts to be fetched from persistence within the current thread and its db lock.
+    This prevents a db mutex contention.
+    */
+	StringTh(th InterpreterThread) string
+
+    /*
     A string containing detailed low-level information about the object.
     */
-	Debug() string
+	Debug(th InterpreterThread) string
 
 	Flags() int8 // version of flags byte suitable for storing in the db RObject row
 
@@ -328,6 +335,10 @@ func (o *robject) IsProxy() bool { return false }
 func (o *robject) IsTransient() bool { return false }
 
 func (o *robject) String() string {
+   return o.StringTh(nil)
+}
+
+func (o *robject) StringTh(th InterpreterThread) string {
 	var id string
 	if o.HasUUID() {
 		//id = o.UUIDabbrev()
@@ -339,8 +350,8 @@ func (o *robject) String() string {
 }
 
 
-func (o *robject) Debug() string {
-	return fmt.Sprintf("%s@%p",o.String(),o)
+func (o *robject) Debug(th InterpreterThread) string {
+	return fmt.Sprintf("%s@%p",o.StringTh(th),o)
 }
 
 
@@ -677,8 +688,12 @@ func (o *runit) String() string {
 	return (&(o.robject)).String()
 }
 
-func (o *runit) Debug() string {
-	return (&(o.robject)).Debug()
+func (o *runit) StringTh(th InterpreterThread) string {
+	return (&(o.robject)).StringTh(th)
+}
+
+func (o *runit) Debug(th InterpreterThread) string {
+	return (&(o.robject)).Debug(th)
 }
 
 func (u runit) IsUnit() bool {
@@ -870,7 +885,9 @@ func (rt *RuntimeEnv) NewObject(typeName string) (RObject, error) {
     	*/
 
 	// TODO Need to handle parameterized types here
+        TypesMutex.RLock()
 	typ, found := rt.Types[typeName]
+        TypesMutex.RUnlock()
 	if !found {
 		return nil, fmt.Errorf("Type '%s' not found.", typeName)
 	}

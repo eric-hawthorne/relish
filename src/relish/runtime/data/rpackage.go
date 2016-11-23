@@ -113,7 +113,7 @@ func (p *RPackage) ListMethod(name string) {
 	fmt.Println("Multimethod", name, "visible in package", p.Name)
 	fmt.Println("------------")
 	mm := p.MultiMethods[name]
-    fmt.Println(mm.Debug())
+    fmt.Println(mm.Debug(nil))
 }
 
 

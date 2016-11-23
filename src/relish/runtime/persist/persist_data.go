@@ -1406,15 +1406,17 @@ func (db *SqliteDBThread) fetch1(query string, arg interface{}, radius int, errS
       // that used the same local database, so that the package's short name has been recorded 
       // in the artifact local database.
     
+      TypesMutex.RLock()
       typ := RT.Typs[typeName]
+      TypesMutex.RUnlock()
       if typ == nil {
    
-         fmt.Println("typeName",typeName)
+         //fmt.Println("typeName",typeName)
          pkgShortName := PackageShortName(typeName)
-         fmt.Println("pkgShortName",pkgShortName)         
+         //fmt.Println("pkgShortName",pkgShortName)         
    //      localTypeName := LocalTypeName(typeName)   
          pkgFullName := RT.PkgShortNameToName[pkgShortName]
-         fmt.Println("pkgFullName",pkgFullName)         
+         //fmt.Println("pkgFullName",pkgFullName)         
          originAndArtifact := OriginAndArtifact(pkgFullName) 
          packagePath := LocalPackagePath(pkgFullName)      
       
@@ -1425,7 +1427,9 @@ func (db *SqliteDBThread) fetch1(query string, arg interface{}, radius int, errS
             return
          }
          
+         TypesMutex.RLock()
          typ = RT.Typs[typeName]    
+         TypesMutex.RUnlock()
           
          // Alternate strategy!!    
    	   // rterr.Stop("Can't summon object. The package which defines its type, '%s', has not been loaded into the runtime.",localTypeName) 
@@ -1617,7 +1621,9 @@ func (db *SqliteDBThread) fetchMultiple(query string, queryArgObjs []RObject, id
 				}
 			}
 
+                    TypesMutex.RLock()
 		    typ := RT.Typs[typeName]
+                    TypesMutex.RUnlock()
 		    if typ == nil {
 		   
 		      pkgShortName := PackageShortName(typeName)  
@@ -1633,7 +1639,9 @@ func (db *SqliteDBThread) fetchMultiple(query string, queryArgObjs []RObject, id
 		         return
 		      }
 		         
-              typ = RT.Typs[typeName]    		  
+                    TypesMutex.RLock()
+                    typ = RT.Typs[typeName]    		  
+                    TypesMutex.RUnlock()
                      
 		      // Alternate strategy!!    
 			   // rterr.Stop("Can't summon object. The package which defines its type, '%s', has not been loaded into the runtime.",localTypeName) 

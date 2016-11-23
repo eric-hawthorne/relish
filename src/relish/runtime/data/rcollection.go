@@ -129,7 +129,7 @@ type RemovableMixin interface {
 	/*
 	   removedIndex will be -1 if not applicable or if removed is false
 	*/
-	Remove(obj RObject) (removed bool, removedIndex int)
+	Remove(th InterpreterThread, obj RObject) (removed bool, removedIndex int)
 
 	/*
 		Removes all members of the in-memory aspect of the collection, setting its len to 0. 
@@ -288,11 +288,15 @@ type sortOp struct {
 }
 
 func (o *rcollection) String() string {
-	return (&(o.robject)).String()
+	return (&(o.robject)).StringTh(nil)  // Not ThreadSafe
 }
 
-func (o *rcollection) Debug() string {
-	return (&(o.robject)).Debug() 
+func (o *rcollection) StringTh(th InterpreterThread) string {
+	return (&(o.robject)).StringTh(th)
+}
+
+func (o *rcollection) Debug(th InterpreterThread) string {
+	return (&(o.robject)).Debug(th) 
 }
 
 /*
@@ -415,20 +419,31 @@ type rset struct {
 	m map[RObject]bool // use this as set 
 }
 
+// DEBUGGING KLUDGE - REMOVE THIS
+//
+//var DieInUseDB bool = false
+
+///////////////////
+
 func (o *rset) String() string {
+   //DieInUseDB = true
+   return "ERROR: CANNOT PRINT rset WITHOUT THREAD CONTEXT"
+}
+
+func (o *rset) StringTh(th InterpreterThread) string {
    s := ""
    if o.Length() > 4 {
 	   sep := "\n   {"
-	   for obj := range o.Iter(nil) {
-	      s += sep + obj.String()
+	   for obj := range o.Iter(th) {
+	      s += sep + obj.StringTh(th)
 	      sep = "\n      "
 	   }
 	   s += "\n   }"
    	} else { // Horizontal layout
 	   s = "{"
 	   sep := ""	
-	   for obj := range o.Iter(nil) {
-	      s += sep + obj.String()
+	   for obj := range o.Iter(th) {
+	      s += sep + obj.StringTh(th)
 	      sep = "   "
 	   }
 	   s += "}"
@@ -436,8 +451,8 @@ func (o *rset) String() string {
    return s
 }
 
-func (o *rset) Debug() string {
-	return fmt.Sprintf("%s len:%d\n%s",  (&(o.rcollection)).Debug() , o.Length(), o.String())
+func (o *rset) Debug(th InterpreterThread) string {
+	return fmt.Sprintf("%s len:%d\n%s",  (&(o.rcollection)).Debug(th) , o.Length(), o.StringTh(th))
 }
 
 func (s *rset) BoolMap() map[RObject]bool {
@@ -469,12 +484,12 @@ func (s *rset) AddSimple(obj RObject) (newLen int) {
 	return
 }
 
-func (s *rset) Remove(obj RObject) (removed bool, removedIndex int) {
+func (s *rset) Remove(th InterpreterThread, obj RObject) (removed bool, removedIndex int) {
 
     if s.m == nil {	
     	return
     } 
-    s.deproxify(nil)	
+    s.deproxify(th)	
 
 	removed = s.m[obj]
 	delete(s.m, obj) // delete(s.m,obj)
@@ -697,19 +712,24 @@ type rsortedset struct {
 }
 
 func (o *rsortedset) String() string {
+   //DieInUseDB = true
+   return "ERROR: CANNOT PRINT rsortedset WITHOUT THREAD CONTEXT"
+}
+
+func (o *rsortedset) StringTh(th InterpreterThread) string {
    s := ""
    if o.Length() > 4 {
 	   sep := "\n   {"
-	   for obj := range o.Iter(nil) {
-	      s += sep + obj.String()
+	   for obj := range o.Iter(th) {
+	      s += sep + obj.StringTh(th)
 	      sep = "\n      "
 	   }
 	   s += "\n   }"
    	} else { // Horizontal layout
 	   s = "{"
 	   sep := ""	
-	   for obj := range o.Iter(nil) {
-	      s += sep + obj.String()
+	   for obj := range o.Iter(th) {
+	      s += sep + obj.StringTh(th)
 	      sep = "   "
 	   }
 	   s += "}"
@@ -717,10 +737,8 @@ func (o *rsortedset) String() string {
    return s
 }
 
-func (o *rsortedset) Debug() string {
-	return fmt.Sprintf("%s len:%d\n%s",  (&(o.rcollection)).Debug() , o.Length(), o.String())
-
-
+func (o *rsortedset) Debug(th InterpreterThread) string {
+	return fmt.Sprintf("%s len:%d\n%s",  (&(o.rcollection)).Debug(th) , o.Length(), o.StringTh(th))
 }
 
 func (s *rsortedset) BoolMap() map[RObject]bool {
@@ -1057,28 +1075,28 @@ func (c *rsortedset) Contains(th InterpreterThread, obj RObject) (found bool) {
 
 
 
-func (s *rsortedset) Remove(obj RObject) (removed bool, removedIndex int) {
+func (s *rsortedset) Remove(th InterpreterThread, obj RObject) (removed bool, removedIndex int) {
 
 	if s.v == nil {
         Logln(COLL2_,"rsortedset.Remove(): s.v == nil, removed == false, removedIndex == -1")   		
 		removedIndex = -1
 	} else {			
-        s.deproxify(nil)	
+        s.deproxify(th)	
         len1 := len(s.m)
 		delete(s.m, obj) // delete (s.m,obj)
 		len2 := len(s.m)			
 		weird := (len1 == len2)
 		if weird {
 		   Logln(COLL2_,"rsortedset.Remove(): len(s.m) same after delete(s.m,obj). len =", len2)  
-		   Logln(COLL2_,"rsortedset.Remove(): obj =", obj.Debug())   
+		   Logln(COLL2_,"rsortedset.Remove(): obj =", obj.Debug(th))   
 		   for key,val := range s.m {
-		      Logln(COLL2_,"rsortedset.Remove(): m key =", key.Debug(), "val =", val) 		   	   
+		      Logln(COLL2_,"rsortedset.Remove(): m key =", key.Debug(th), "val =", val) 		   	   
 		   }	 	
 		}
 		removedIndex = s.Index(obj, 0)
 		if weird {
 		   for i,val := range *s.v {
-		      Logln(COLL2_,"rsortedset.Remove(): v[",i,"] =", val.Debug()) 		   	  
+		      Logln(COLL2_,"rsortedset.Remove(): v[",i,"] =", val.Debug(th)) 		   	  
 		   }	
 		   Logln(COLL2_,"rsortedset.Remove(): removedIndex =", removedIndex)  			
 		}
@@ -1267,28 +1285,39 @@ type rlist struct {
 }
 
 func (o *rlist) String() string {
+   //DieInUseDB = true
+   return "ERROR: CANNOT PRINT rlist WITHOUT THREAD CONTEXT"
+}
+
+func (o *rlist) StringTh(th InterpreterThread) string {
    s := ""
+   //if th == nil {
+   //   fmt.Println("VVV rlist.StringTh(nil)")
+   //} else {
+   //   fmt.Println("VVV rlist.StringTh()")
+   //}
    if o.Length() > 4 {
 	   sep := "\n   ["
-	   for obj := range o.Iter(nil) {
-	      s += sep + obj.String()
+	   for obj := range o.Iter(th) {
+	      s += sep + obj.StringTh(th)
 	      sep = "\n      "
 	   }
 	   s += "\n   ]"
    	} else { // Horizontal layout
 	   s = "["
 	   sep := ""
-	   for obj := range o.Iter(nil) {
-	      s += sep + obj.String()
+	   for obj := range o.Iter(th) {
+	      s += sep + obj.StringTh(th)
 	      sep = "   "
 	   }
 	   s += "]"
    }
+   //fmt.Println("^^^ rlist.StringTh()")
    return s
 }
 
-func (o *rlist) Debug() string {
-	return fmt.Sprintf("%s len:%d\n%s",  (&(o.rcollection)).Debug() , o.Length(),o.String())
+func (o *rlist) Debug(th InterpreterThread) string {
+	return fmt.Sprintf("%s len:%d\n%s",  (&(o.rcollection)).Debug(th) , o.Length(), o.StringTh(th))
 }
 
 /*
@@ -1746,12 +1775,12 @@ func (s *rlist) Index(obj RObject, start int) int {
 	return -1
 }
 
-func (s *rlist) Remove(obj RObject) (removed bool, removedIndex int) {
+func (s *rlist) Remove(th InterpreterThread, obj RObject) (removed bool, removedIndex int) {
 	
 	if s.v == nil {
 		removedIndex = -1
 	} else {
-		s.deproxify(nil)
+		s.deproxify(th)
 		removedIndex = s.Index(obj, 0)
 		if removedIndex >= 0 {
 			s.v.Delete(removedIndex)
@@ -1890,11 +1919,15 @@ type rstringmap struct {
 	m map[string]RObject
 }
 
-func (o *rstringmap) Debug() string {
-	return fmt.Sprintf("%s len:%d\n%s",  (&(o.rcollection)).Debug() , o.Length(),o.String())
+func (o *rstringmap) Debug(th InterpreterThread) string {
+	return fmt.Sprintf("%s len:%d\n%s",  (&(o.rcollection)).Debug(th) , o.Length(),o.StringTh(th))
 }
 
 func (o *rstringmap) String() string {
+        return o.StringTh(nil)
+}
+
+func (o *rstringmap) StringTh(th InterpreterThread) string {
 	encoded, err := JsonMarshal(nil, o, false)
 	if err != nil {
 		return "({}String > T with unserializable elements)"
@@ -1991,7 +2024,7 @@ func (s *rstringmap) PutSimple(key RObject, val RObject) (newLen int) {
     return
 }
 
-func (s *rstringmap) Remove(key RObject) (removed bool, removedIndex int) {
+func (s *rstringmap) Remove(th InterpreterThread, key RObject) (removed bool, removedIndex int) {
 
 	k := string(key.(String))		
 	_,removed = s.m[k] 
@@ -2044,8 +2077,8 @@ type ruint64map struct {
 	m map[uint64]RObject
 }
 
-func (o *ruint64map) Debug() string {
-	return fmt.Sprintf("%s len:%d",  (&(o.rcollection)).Debug() , o.Length())
+func (o *ruint64map) Debug(th InterpreterThread) string {
+	return fmt.Sprintf("%s len:%d",  (&(o.rcollection)).Debug(th) , o.Length())
 }
 
 func (c *ruint64map) Iter(th InterpreterThread) <-chan RObject {
@@ -2169,7 +2202,7 @@ func (s *ruint64map) PutSimple(key RObject, val RObject) (newLen int) {
 }
 
 
-func (s *ruint64map) Remove(key RObject) (removed bool, removedIndex int) {	
+func (s *ruint64map) Remove(th InterpreterThread, key RObject) (removed bool, removedIndex int) {	
 
     var k uint64
 	switch key.(type) {
@@ -2221,8 +2254,8 @@ type rint64map struct {
 	m map[int64]RObject
 }
 
-func (o *rint64map) Debug() string {
-	return fmt.Sprintf("%s len:%d",  (&(o.rcollection)).Debug() , o.Length())
+func (o *rint64map) Debug(th InterpreterThread) string {
+	return fmt.Sprintf("%s len:%d",  (&(o.rcollection)).Debug(th) , o.Length())
 }
 
 func (c *rint64map) Iter(th InterpreterThread) <-chan RObject {
@@ -2344,7 +2377,7 @@ func (s *rint64map) PutSimple(key RObject, val RObject) (newLen int) {
     return
 }
 
-func (s *rint64map) Remove(key RObject) (removed bool, removedIndex int) {	
+func (s *rint64map) Remove(th InterpreterThread, key RObject) (removed bool, removedIndex int) {	
 
     var k int64
 	switch key.(type) {
@@ -2384,8 +2417,8 @@ type rpointermap struct {
 	m map[RObject]RObject
 }
 
-func (o *rpointermap) Debug() string {
-	return fmt.Sprintf("%s len:%d",  (&(o.rcollection)).Debug() , o.Length())
+func (o *rpointermap) Debug(th InterpreterThread) string {
+	return fmt.Sprintf("%s len:%d",  (&(o.rcollection)).Debug(th) , o.Length())
 }
 
 func (c *rpointermap) Iter(th InterpreterThread) <-chan RObject {
@@ -2483,7 +2516,7 @@ func (s *rpointermap) PutSimple(key RObject, val RObject) (newLen int) {
     return
 }
 
-func (s *rpointermap) Remove(key RObject) (removed bool, removedIndex int) {
+func (s *rpointermap) Remove(th InterpreterThread, key RObject) (removed bool, removedIndex int) {
 
 	_,removed = s.m[key] 
 	delete(s.m, key) 
