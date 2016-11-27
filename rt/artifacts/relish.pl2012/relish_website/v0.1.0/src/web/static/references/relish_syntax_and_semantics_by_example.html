@@ -2485,7 +2485,7 @@ slice bytes Bytes start Int > Byte
 context name String > Any
 """
  Returns the object with the specified global name in the context.
- Returns NIL if there is no object in the context under the given name.
+ Returns nil if there is no object in the context under the given name.
 """
 
 
@@ -3110,6 +3110,8 @@ initCar
    c Car 
    make Company
    model String
+>
+   Car
 """
  Initializes a Car object.
 """
@@ -3127,7 +3129,7 @@ When a constructor call occurs, that is, a use of the type name in method-name p
 An init&lt;TypeName&gt; method should explicitly call init... methods for direct supertypes of the type, if init... methods other than those that would be called by default are needed.
 </p>
 <p>
-An init&lt;TypeName&gt; method can also be called explicitly, in case re-initialization is desired for a pre-existing object, for example, in a scheme that re-uses objects rather than allocating new ones.
+An init&lt;TypeName&gt; method can also be called explicitly, in case re-initialization is desired for a pre-existing object, for example, in a scheme that re-uses objects rather than allocating new ones. Note. Unlike other methods, if calling an init... function explicitly from a different package, you must prefix the method name with the package name. e.g. model.initWidget
 </p>
 
 <br/>
@@ -3188,16 +3190,16 @@ Student 500 enrollees -- 1 8 Course       // 500 means 500 500 - silly case
 
 Cart 1 -- {&lt;age} N Horse         // relation-end names omitted
 
-Student 1 500 enrollees -- [] 1 8 Course       // Use a List to collect the courses 
+Student 1 500 enrollees -- 1 8 [] Course       // Use a List to collect the courses 
 
-Student 1 500 enrollees -- {&lt;name} 1 8 Course   // Use a Set that orders by Course.name
+Student 1 500 enrollees -- 1 8 {&lt;name} Course   // Use a Set that orders by Course.name
 
-<span class="future">Student 1 500 enrollees -- {&lt;} 1 8 name=>Course      
+<span class="future">Student 1 500 enrollees -- 1 8 {&lt;} name > Course      
 """
  Use a Map of courses that you can access by Course.name. Also sorts by course.name.
 """
 
-Student 1 500 enrollees -- {&lt;} 1 8 String=>Course
+Student 1 500 enrollees --  1 8 {&lt;} String > Course
 """
  This one is a sorted Map, but you give a String key to each course as you add the
  course into the relation. The map is ordered by the values of its keys when iterated over.
