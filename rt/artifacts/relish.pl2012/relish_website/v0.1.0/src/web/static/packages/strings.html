@@ -74,6 +74,8 @@ relish is implemented in Go, and inherits/wraps some Go features like goroutine 
   <a href="#lower">lower</a><br/>   
   <a href="#numCodePoints" class="alt">numCodePoints</a><br/>
   <a href="#replace">replace</a><br/>
+  <a href="#at" class="alt">at</a><br/>
+  <a href="#runeAt">runeAt</a><br/>
 	<a href="#slice" class="alt">slice</a><br/>			
   <a href="#split">split</a><br/>     
   <a href="#title" class="alt">title</a><br/>   
@@ -140,6 +142,12 @@ As well as the methods in the strings package, listed below, relish also provide
 </tr>
 <tr>
 	<td><a href="#replace">replace</a></td><td> - a copy of the string with instances of old replaced by new</td>
+</tr>
+<tr>
+  <td><a href="#at">at</a></td><td> - the Byte at the specified index in the String</td>
+</tr>
+<tr>
+  <td><a href="#runeAt">runeAt</a></td><td> - the unicode codepoint at the specified index in the String</td>
 </tr>
 <tr>
 	<td><a href="#slice">slice</a></td><td> - substring of the string, specified by an inclusive start and (optional) exclusive end index</td>
@@ -341,14 +349,30 @@ join a []Any sep String > String
 
 <a name="replace">replace s String old String new String > String</a>
 """
-  Returns a copy of the string s with all non-overlapping instances of old replaced by new. 
+ Returns a copy of the string s with all non-overlapping instances of old replaced by new. 
 """
 
 
 replace s String old String new String n Int > String
 """
-  Returns a copy of the string s with the first n non-overlapping instances of old replaced by new. 
-  If n &lt; 0, there is no limit on the number of replacements.
+ Returns a copy of the string s with the first n non-overlapping instances of old replaced by new. 
+ If n &lt; 0, there is no limit on the number of replacements.
+"""
+
+
+<a name="at">at s String i Int > Byte</a>
+"""
+ Return the Byte at the specified index in the String.
+"""   
+  
+  
+<a name="runeAt">runeAt s String i Int > codePoint Int width Int</a>
+"""
+ Return the unicode codepoint value of the UTF-8 encoded character that starts 
+ at the specified byte-index in the String.
+ Also return the width in bytes of the UTF-8 encoding of the character.
+ At end of string, returns RuneError 0
+ At an invalid encoding, returns RuneError 1
 """
 
 

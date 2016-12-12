@@ -1920,6 +1920,14 @@ urlPathPartDecode s > String
 	stringAtMethod.PrimitiveCode = builtinStringAt		
 	
 	
+	// runeAt s String i Int > codePoint Int width Int
+	//
+	stringRuneAtMethod, err := RT.CreateMethod("",nil,"runeAt", []string{"s","i"}, []string{"String","Int"}, []string{"Int","Int"}, false, 0, false)
+	if err != nil {
+		panic(err)
+	}
+	stringRuneAtMethod.PrimitiveCode = builtinStringRuneAt	
+
 	
     ///////////////////////////////////////////////////////////////////
     // Bytes functions
@@ -5515,6 +5523,31 @@ func stringAtErrHandle(i int, s string) {
           // rterr.Stopf("Error: index [%d] is out of range. String length is %d.",i,len(s))
       }	
 }
+
+
+
+
+
+/*
+runeAt s String i Int > codePoint Int width Int
+"""
+ Return the unicode codepoint value of the UTF-8 encoded character that starts 
+ at the specified byte-index in the String.
+ Also return the width in bytes of the UTF-8 encoding of the character.
+ At end of string, returns RuneError 0
+ At an invalid encoding, returns RuneError 1
+"""
+*/ 
+func builtinStringRuneAt(th InterpreterThread, objects []RObject) []RObject {
+	s := string(objects[0].(String))
+	i := int(int64(objects[1].(Int)))	
+	
+    cp, w := utf8.DecodeRuneInString(s[i:])
+	
+  
+    return []RObject{Int(cp),Int(w)}	
+}
+
 
 /////////////////////////////////////////////////////////////// 
 // Bytes functions
