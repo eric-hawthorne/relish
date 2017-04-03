@@ -1586,6 +1586,9 @@ func (s *rlist) IsIndexSettable() bool {
 }
 
 func (s *rlist) Len() int {
+	if s.v == nil {
+		return 0
+	}
 	return s.v.Len()
 }
 

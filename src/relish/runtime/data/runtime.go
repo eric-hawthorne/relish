@@ -744,6 +744,11 @@ func (rt *RuntimeEnv) SetAttr(th InterpreterThread, obj RObject, attr *Attribute
        return
     }
 
+    if val == nil {
+		err = fmt.Errorf("Attempt to assign value of uninitialized variable to '%v' attribute.", attr.Part.Name)
+		return    	
+    }
+
 	if typeCheck {
         // This is a kludge
         if attr.Part.CollectionType != "" { // "list", "sortedlist","set", "sortedset", "map", "stringmap", "sortedmap","sortedstringmap" ""
