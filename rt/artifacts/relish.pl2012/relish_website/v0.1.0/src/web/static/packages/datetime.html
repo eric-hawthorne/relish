@@ -56,7 +56,7 @@ relish is implemented in Go, and inherits/wraps some Go features like goroutine 
 	DOWNLOAD
   </a>	
 <div id="index">
-	<a href="#Summary">Summary</a><br/>	
+	<a href="#Summary" class="alt">Summary</a><br/>	
 	<a href="#addDate">addDate</a><br/>	
 	<a href="#clock" class="alt">clock</a><br/>
 	<a href="#date">date</a><br/>
@@ -66,26 +66,27 @@ relish is implemented in Go, and inherits/wraps some Go features like goroutine 
   <a href="#hour">hour</a><br/>   
   <a href="#hours" class="alt">hours</a><br/>
   <a href="#hoursEquivalentOf">hoursEquivalentOf</a><br/>
-	<a href="#milliseconds" class="alt">milliseconds</a><br/>	
-	<a href="#minus">minus</a><br/>	
-	<a href="#minute" class="alt">minute</a><br/>			
-  <a href="#minutes">minutes</a><br/>   
-  <a href="#minutesEquivalentOf" class="alt">minutesEquivalentOf</a><br/>
-  <a href="#month">month</a><br/>
-	<a href="#now" class="alt">now</a><br/>			
-  <a href="#plus">plus</a><br/>   
-  <a href="#nanosecond" class="alt">nanosecond</a><br/>
-  <a href="#second">second</a><br/>
-	<a href="#seconds" class="alt">seconds</a><br/>	
-	<a href="#secondsEquivalentOf">secondsEquivalentOf</a><br/>	
-	<a href="#since" class="alt">since</a><br/>			
-  <a href="#sleep">sleep</a><br/>   
-  <a href="#tick" class="alt">tick</a><br/>
-  <a href="#timeIn">timeIn</a><br/>
-	<a href="#timeParts" class="alt">timeParts</a><br/>			
-  <a href="#weekday">weekday</a><br/>   
-  <a href="#year" class="alt">year</a><br/>
-  <a href="#zone">zone</a><br/>
+  <a href="#location" class="alt">location</a><br/>
+	<a href="#milliseconds">milliseconds</a><br/>	
+	<a href="#minus" class="alt">minus</a><br/>	
+	<a href="#minute">minute</a><br/>			
+  <a href="#minutes" class="alt">minutes</a><br/>   
+  <a href="#minutesEquivalentOf">minutesEquivalentOf</a><br/>
+  <a href="#month" class="alt">month</a><br/>
+	<a href="#now">now</a><br/>			
+  <a href="#plus" class="alt">plus</a><br/>   
+  <a href="#nanosecond">nanosecond</a><br/>
+  <a href="#second" class="alt">second</a><br/>
+	<a href="#seconds">seconds</a><br/>	
+	<a href="#secondsEquivalentOf" class="alt">secondsEquivalentOf</a><br/>	
+	<a href="#since">since</a><br/>			
+  <a href="#sleep" class="alt">sleep</a><br/>   
+  <a href="#tick">tick</a><br/>
+  <a href="#timeIn" class="alt">timeIn</a><br/>
+	<a href="#timeParts">timeParts</a><br/>			
+  <a href="#weekday" class="alt">weekday</a><br/>   
+  <a href="#year">year</a><br/>
+  <a href="#zone" class="alt">zone</a><br/>
 </div>  
 <div id="content_manual">
 <a name="Summary"><h3>Summary</h3></a>
@@ -139,6 +140,9 @@ of detecting a time that has not been initialized explicitly.
 </tr>
 <tr>
    <td><a href="#hoursEquivalentOf">hoursEquivalentOf</a></td><td> - the duration as a floating point number of hours</td>
+</tr>
+<tr>
+   <td><a href="#location">location</a></td><td> - name of IANA time location (long-form time-zone name) of the Time</td>
 </tr>
 <tr>
    <td><a href="#milliseconds">milliseconds</a></td><td> - converts n milliseconds to the equivalent number of nanoseconds</td>
@@ -299,6 +303,12 @@ duration hours Int minutes Int seconds Int nanoseconds Int > durationNs Int
 <a name="hoursEquivalentOf">hoursEquivalentOf durationNs Int > Float</a>
 """
  Returns the duration as a floating point number of hours.
+""" 
+
+<a name="location">location t Time > locationName String</a>
+"""
+ Name of IANA time location (long-form time-zone name) of the Time.
+ See IANA time zone db documentation on the web or http://golang.org/pkg/time/
 """ 
 
 

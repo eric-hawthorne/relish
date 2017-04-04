@@ -1003,6 +1003,17 @@ func InitBuiltinFunctions(relishRoot string) {
 	}
 	timeInMethod.PrimitiveCode = builtinTimeIn
 
+    // location t Time > locationName String 
+    //
+    // Returns IANA time location name (long-form timezone name) for the time.
+    //
+	timeLocationMethod, err := RT.CreateMethod("relish/pkg/datetime",nil,"location", []string{"t"}, []string{"Time"},  []string{"String"}, false, 0, false)
+	if err != nil {
+		panic(err)
+	}
+	timeLocationMethod.PrimitiveCode = builtinTimeLocation
+
+
     // hours n Int > durationNs Int
     // 
 	hoursMethod, err := RT.CreateMethod("relish/pkg/datetime",nil,"hours", []string{"n"}, []string{"Int"}, []string{"Int"}, false, 0, false)
@@ -3784,6 +3795,15 @@ func builtinTimeSince(th InterpreterThread, objects []RObject) []RObject {
     d := time.Since(t)
 	return []RObject{Int(int64(d))}		
 }	
+
+// location t Time > locationName String
+//
+func builtinTimeLocation(th InterpreterThread, objects []RObject) []RObject {
+	t := time.Time(objects[0].(RTime))
+    loc := t.Location().String()
+	return []RObject{String(loc)}		
+}	
+
 
 // timeIn t Time location String > Time 
 // 
