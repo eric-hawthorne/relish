@@ -12,8 +12,10 @@ import (
         "syscall"
 	"strconv"
 	"sync"
+	"time"
 )
 
+const DEBUG = false   // change to true to log Sent,Received modbus data packets on stdout
 //const (
 //    NO_CONNECTION       = "No connection established."
 //    ERR_TRANSACTION_ID  = "Transaction ID mismatched."
@@ -27,8 +29,11 @@ var transactionId int32 = 0
 type ModbusTCP struct {
 	*modbus
 	tcpConn net.Conn
+	connectTimeout time.Duration
 	tID     int32
 	ipAddrAndPort string
+	connectionUseMutex sync.Mutex
+	isUsingConnection bool
 }
 
 
@@ -46,12 +51,23 @@ var openTcpConnections map[string]net.Conn = make(map[string]net.Conn)
 
 var openConnectionMutex sync.Mutex
 
+/*
+ipAddrAndPort should be formatted like "24.80.214.33:502"
+
+Registers the fact that connections to ipAddrAndPort should use (share) a persistently open TCP connection.
+The TCP connection is not actually opened until the first ModbusTCP.Connect(...) call is made to the 
+address and port, after this preparatory call.
+*/
 func MaintainOpenConnection(ipAddrAndPort string) {
    openConnectionMutex.Lock()
    useKeptAliveConnection[ipAddrAndPort] = true
    openConnectionMutex.Unlock()
 }
 
+/*
+Makes it so that ipAddrAndPort no longer has an open tcp connection.
+Closes the persistently open connection.
+*/
 func DiscardOpenConnection(ipAddrAndPort string) {
    openConnectionMutex.Lock()	
    useKeptAliveConnection[ipAddrAndPort] = false
@@ -65,14 +81,15 @@ func DiscardOpenConnection(ipAddrAndPort string) {
 /*
    This creates a Modbus over TCP client.
 */
-func MakeModbusTCP(addressMode string, queryTimeout uint64, queryRetries uint32) *ModbusTCP {
-	mTCP := &ModbusTCP{MakeModbus(addressMode, queryTimeout, queryRetries), nil, 0, ""}
+func MakeModbusTCP(addressMode string, connectTimeout time.Duration, queryTimeout uint64, queryRetries uint32) *ModbusTCP {
+	mTCP := &ModbusTCP{modbus:MakeModbus(addressMode, queryTimeout, queryRetries), tcpConn:nil, connectTimeout: connectTimeout, tID:0, ipAddrAndPort:""}
 
 	return mTCP
 }
 
 /*
-   Creates a TCP connection to slave on specified IP address and port
+   Creates a TCP connection to slave on specified IP address and port.
+   May re-use an open connection if one is found.
 
    @param  ippAddr     - IP address
            port
@@ -81,7 +98,8 @@ func MakeModbusTCP(addressMode string, queryTimeout uint64, queryRetries uint32)
    @return err         - connection error
 */
 func (mTCP *ModbusTCP) Connect(ipAddr string, port uint32, slaveAddr uint32) (err error) {
-   
+    mTCP.connectionUseMutex.Lock()
+	mTCP.isUsingConnection = true   
     mTCP.ipAddrAndPort = ipAddr+":"+strconv.FormatUint(uint64(port), 10)
 
     openConnectionMutex.Lock()	
@@ -89,8 +107,14 @@ func (mTCP *ModbusTCP) Connect(ipAddr string, port uint32, slaveAddr uint32) (er
     connection, found := openTcpConnections[mTCP.ipAddrAndPort]
     if ! found {
 
-		connection, err = net.Dial("tcp", mTCP.ipAddrAndPort)
+        // TODO: Use DialTimeout(..) or a custom Transport!!
+        // Why do I think I already implemented that? Do we have the wrong
+        // version of this code? TODO Find out.
+        //
+		connection, err = net.DialTimeout("tcp", mTCP.ipAddrAndPort, mTCP.connectTimeout)
 		if err != nil {
+			mTCP.isUsingConnection = false
+			mTCP.connectionUseMutex.Unlock()
 			return
 		}
         
@@ -117,7 +141,7 @@ func (mTCP *ModbusTCP) RepairConnection() (err error) {
     defer openConnectionMutex.Unlock()
     mTCP.tcpConn.Close() // can fail
     var connection net.Conn
-    connection, err = net.Dial("tcp", mTCP.ipAddrAndPort)
+    connection, err = net.DialTimeout("tcp", mTCP.ipAddrAndPort, mTCP.connectTimeout)
     if err != nil {
         return
     }
@@ -133,9 +157,14 @@ func (mTCP *ModbusTCP) RepairConnection() (err error) {
 
 /*
    Closes the TCP connection.
-   WARNING. Do not call this if your ModbusTCP is using a shared open (kept-alive) TCP connection.
+   Except, if the ModbusTCP is using a shared open (kept-alive) TCP connection, 
+   this has no effect.
 */
 func (mTCP *ModbusTCP) Close() {
+	if mTCP.isUsingConnection {
+		defer mTCP.connectionUseMutex.Unlock()
+        defer mTCP.isUsingConnection = false
+	}
 	if mTCP.tcpConn != nil {
         openConnectionMutex.Lock()	
         defer openConnectionMutex.Unlock()		
@@ -182,14 +211,14 @@ func (mTCP *ModbusTCP) Send(pdu []byte) (err error) {
 	var n int
 	n, err = mTCP.tcpConn.Write(message)
 
-	fmt.Printf("Sent %x, %v bytes sent.", message, n)
+	if DEBUG { fmt.Printf("Sent %x, %v bytes sent.", message, n) }
 	if err != nil {
 		fmt.Println( "Error:", err )
 		if err == io.EOF || err == syscall.EINVAL {
                    err = errors.New(CONNECTION_DEAD)
                 }
 	} else  {
-		fmt.Println( "" )
+		if DEBUG { fmt.Println( "" ) }
 	}
 
 	return
@@ -230,7 +259,7 @@ func (mTCP *ModbusTCP) Read() (response []byte, err error) {
 
 		id := ToInt(header[0:2])
 		if id == mTCP.tID {
-			fmt.Println("Transaction ID correct.")
+			if DEBUG { fmt.Println("Transaction ID correct.") }
 		} else {
 			//fmt.Printf( "Transaction ID mismatch: %v.\n", mTCP.tID )
 			return []byte{}, errors.New(ERR_TRANSACTION_ID)
@@ -242,7 +271,7 @@ func (mTCP *ModbusTCP) Read() (response []byte, err error) {
 		}
 
 		length := ToInt(header[4:6])
-		fmt.Printf("Response is %v bytes.\n", length)
+		if DEBUG { fmt.Printf("Response is %v bytes.\n", length) }
 
 		slaveAddr := header[6]
 		if slaveAddr == mTCP.slaveAddr {
@@ -257,7 +286,7 @@ func (mTCP *ModbusTCP) Read() (response []byte, err error) {
 			// Read modbus response
 			_, err = mTCP.tcpConn.Read(response)
 			if err == nil {
-				fmt.Printf("Received %x\n", response)
+				if DEBUG { fmt.Printf("Received %x\n", response) }
 				break
 			}
 		}

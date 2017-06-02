@@ -7,6 +7,7 @@ package modbus
 import (
 //    "fmt"
 "errors"
+"sync"
 )
 
 type Modbus interface {
@@ -15,8 +16,12 @@ type Modbus interface {
 	WriteSingleRegister(addr uint32, value uint16) []byte
 	Diagnostic(value int32) []byte
 	Send(pdu []byte) (err error)
-        RepairConnection() (err error)
+    RepairConnection() (err error)
 	Read() (response []byte, err error)
+
+	// Used to serialize use of the Query method on a particular Modbus object.	
+    lock()
+    unlock()
 }
 
 /// Go time appears to always be measured in nanoseconds.
@@ -85,6 +90,9 @@ var ERRORS = map[uint32]string{
                err - error from response
 */
 func Query(mb Modbus, command []byte) (response []byte, err error) {
+	mb.lock()
+	defer mb.unlock()
+
 	//fmt.Println ("=====")
 	err = mb.Send(command)
 	if err != nil {
@@ -150,6 +158,7 @@ type modbus struct {
 	queryTimeout uint64 // in nanoseconds
 	queryRetries uint32
 	slaveAddr    byte
+    mutex sync.Mutex	
 }
 
 func MakeModbus(addressMode string, queryTimeout uint64, queryRetries uint32) *modbus {
@@ -160,13 +169,21 @@ func MakeModbus(addressMode string, queryTimeout uint64, queryRetries uint32) *m
 	if addressMode != FOUR_BYTE_MODE || addressMode != TWO_BYTE_MODE {
 		addressMode = FOUR_BYTE_MODE
 	}
-	return &modbus{addressMode, queryTimeout, queryRetries, 0}
+	return &modbus{addressMode:addressMode, queryTimeout: queryTimeout, queryRetries:queryRetries, slaveAddr:0}
+}
+
+func (m *modbus) lock() {
+	m.mutex.Lock()
+}
+
+func (m *modbus) unlock() {
+	m.mutex.Unlock()
 }
 
 /*
    Read Holding Registers
 
-   @param      addr        - start address of registers
+   @param      addr        - start address of registers (0-based index in holding register table)
                numRegister - number of registers to read
 
    @return     ModBus command frame for reading multiple registers
@@ -185,7 +202,7 @@ func (m *modbus) ReadHoldingRegisters(addr uint32, numRegister uint32) []byte {
 /*
    Write Multiple Regisers
 
-   @param      addr        - start address of registers
+   @param      addr        - start address of registers (0-based index in holding register table)
                values      - an array of interger values to write to registers
 
    @return     ModBus command frame for writing multiple registers
@@ -211,7 +228,7 @@ func (m *modbus) WriteMultipleRegisters(addr uint32, values []uint16) []byte {
 /*
    Write Single Register
 
-   @param      addr        - start address of register
+   @param      addr        - start address of register (0-based index in holding register table)
                value       - integer value to write to register
 
    @return     ModBus command frame for writing single register

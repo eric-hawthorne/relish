@@ -10,6 +10,7 @@ import (
    . "relish/runtime/data"
    modbus "relish/runtime/native_methods/extensions/protocols/modbus"
    "strconv"
+   "time"
 )
 
 
@@ -453,7 +454,7 @@ func initModbusTcp(th InterpreterThread, objects []RObject) []RObject {
    queryTimeout := uint64(objects[2].(Uint))    
    queryRetries := uint32(objects[3].(Uint32))
 
-   modbusTcp := modbus.MakeModbusTCP( addressMode, queryTimeout, queryRetries )
+   modbusTcp := modbus.MakeModbusTCP( addressMode, time.Duration(queryTimeout), queryTimeout, queryRetries )
 
    modbusWrapper.GoObj = modbusTcp
 

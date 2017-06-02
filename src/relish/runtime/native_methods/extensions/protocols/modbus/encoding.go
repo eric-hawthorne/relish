@@ -10,6 +10,8 @@ import
 
 /*
     Converts an integer to word
+    Specifically: Converts (the least significant 2 bytes worth of) an integer 
+    to a (BigEndian 2-byte) word
 
     @param  num - integer
     @return upper and lower byte representing integer
@@ -20,6 +22,7 @@ func ToWord( num int32 ) (byte, byte) {
 
 /*
     Converts a byte array to integer
+    Specifically: Converts a (BigEndian) byte array to integer - (should work up to a 4-byte slice)
 
     @param  byte array
     @return integer
