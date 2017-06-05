@@ -163,7 +163,7 @@ func (mTCP *ModbusTCP) RepairConnection() (err error) {
 func (mTCP *ModbusTCP) Close() {
 	if mTCP.isUsingConnection {
 		defer mTCP.connectionUseMutex.Unlock()
-        defer mTCP.isUsingConnection = false
+        defer func() { mTCP.isUsingConnection = false }()
 	}
 	if mTCP.tcpConn != nil {
         openConnectionMutex.Lock()	
