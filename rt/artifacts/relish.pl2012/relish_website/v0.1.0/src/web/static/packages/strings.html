@@ -191,8 +191,8 @@ As well as the methods in the strings package, listed below, relish also provide
 """
 
 
-<a name="base64Encode">base64Encode s String urlSafe Bool > decoded Bytes err String</a>
-base64Encode s String urlSafe Bool lineLength Int > decoded Bytes err String
+<a name="base64Encode">base64Encode b Bytes urlSafe Bool > encoded String</a>
+base64Encode b Bytes urlSafe Bool lineLength Int > encoded String
 """
  Encodes Bytes to produce a base-64 encoded String.
  If urlSafe is true, uses the URL-safe and filename-safe encoding format which
