@@ -13,7 +13,8 @@ import (
 	"relish/runtime/native_methods/standard_lib/files_methods"
 	"relish/runtime/native_methods/standard_lib/http_methods"
    "relish/runtime/native_methods/standard_lib/crypto_methods"   	
-   "relish/runtime/native_methods/standard_lib/reflect_methods"     
+   "relish/runtime/native_methods/standard_lib/reflect_methods"  
+   "relish/runtime/native_methods/standard_lib/rand_methods"   
    "relish/runtime/native_methods/extensions/protocols/modbus_methods"
 )
 
@@ -33,7 +34,8 @@ var nativeMethodPackageMap = map [string] func() {
 	"shared.relish.pl2012/relish_lib/pkg/files" : files_methods.InitFilesMethods,
 	"shared.relish.pl2012/relish_lib/pkg/http_srv" : http_methods.InitHttpMethods,	  
    "shared.relish.pl2012/relish_lib/pkg/crypto" : crypto_methods.InitCryptoMethods,    
-   "shared.relish.pl2012/relish_lib/pkg/reflect" : reflect_methods.InitReflectMethods,           
+   "shared.relish.pl2012/relish_lib/pkg/reflect" : reflect_methods.InitReflectMethods,    
+   "shared.relish.pl2012/relish_lib/pkg/rand" : rand_methods.InitRandMethods,    
     "gait.bcit.ca2012/protocols/pkg/modbus" : modbus_methods.InitModbusMethods,   
 }
 
