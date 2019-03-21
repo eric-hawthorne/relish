@@ -2007,6 +2007,19 @@ urlPathPartDecode s > String
 	lenMethod.PrimitiveCode = builtinLen
 
 
+	// len n Nothing > Int	
+	//
+	// Length of nil is 0
+	// An uninitialized attribute or relation may return nil so have len == 0
+	//
+	nilLenMethod, err := RT.CreateMethod("",nil,"len", []string{"n"}, []string{"Nothing"}, []string{"Int"}, false, 0, false)
+	if err != nil {
+		panic(err)
+	}
+	nilLenMethod.PrimitiveCode = builtinNilLen
+
+
+
 	// cap coll Collection > Int	
 	//
 	capMethod, err := RT.CreateMethod("",nil,"cap", []string{"c"}, []string{"Collection"},  []string{"Int"}, false, 0, false)
@@ -4460,6 +4473,13 @@ func builtinLen(th InterpreterThread, objects []RObject) []RObject {
 	val = Int(coll.Length())
 	return []RObject{val}
 }
+
+func builtinNilLen(th InterpreterThread, objects []RObject) []RObject {
+	var val RObject	
+	val = Int(0)
+	return []RObject{val}
+}
+
 
 func builtinCap(th InterpreterThread, objects []RObject) []RObject {
 	coll := objects[0].(RCollection)
