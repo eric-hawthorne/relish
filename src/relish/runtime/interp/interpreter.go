@@ -1956,7 +1956,7 @@ TODO TODO We cannot have the return values on the stack in reverse order like th
 It will not work for using the values as args to the next outer method.
 */
 func (i *Interpreter) apply1(t *Thread, m *RMethod, args []RObject) (err error) {
-//	defer UnM(t, TraceM(t,INTERP_TR, "apply1", m, "to", args))	
+	defer UnM(t, TraceM(t,INTERP_TRF, "apply1", m, "to", args))	
 //	defer UnM(t, TraceM(t,INTERP_TR, m.String()))		
 //	if strings.Contains(m.String(),"spew") {
 //		fmt.Println(args)

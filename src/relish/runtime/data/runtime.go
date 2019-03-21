@@ -642,6 +642,8 @@ func (rt *RuntimeEnv) AttrValue(th InterpreterThread, obj RObject, attr *Attribu
 		}
         if val != nil {
                         // THE LOGGING STATEMENT IS NOT THREAD-SAFE!!! 
+			Logln(ALWAYS_, "Fetched Attribute", attr.ShortName())
+
 			Logln(PERSIST2_, "AttrVal (fetched) =", val.StringTh(th))
             found = true
 		} 

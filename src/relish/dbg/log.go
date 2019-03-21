@@ -63,7 +63,8 @@ const (
 	GC3_        = 1 << iota		
 	COLL_       = 1 << iota		
 	COLL2_      = 1 << iota		
-	LOCK_       = 1 << iota		 		
+	LOCK_       = 1 << iota		
+	INTERP_TRF  = 1 << iota		 		
 	ANY_        = 0xFFFFFFFFFFFFFFFF	
 )
 
@@ -83,7 +84,8 @@ const (
 	INTERP__    = INTERP_                   // Log INTERPreter aspect of program at minimum verbosity level
 	INTERP2__   = INTERP2_ | INTERP__	    // Log INTERPreter aspect of program at medium verbosity level
 	INTERP3__   = INTERP3_ | INTERP2__    	// Log INTERPreter aspect of program at max verbosity level	
-	INTERP__TR  = INTERP_TR	
+	INTERP__TRF = INTERP_TRF
+	INTERP__TR  = INTERP_TR	| INTERP_TRF
 	INTERP__TR2 = INTERP_TR2 | INTERP__TR
 	INTERP__TR3 = INTERP_TR3 | INTERP__TR2	
 	PERSIST__   = PERSIST_
@@ -116,9 +118,12 @@ const (
 //const SOME_DEBUG_FLAGS =  AST__ | PARSE__ | PERSIST2__ | PERSIST__TR2| INTERP__TR2 | INTERP2__	
 //const SOME_DEBUG_FLAGS =   PERSIST2__ | PERSIST__TR2 | WEB__ | ALWAYS_
 
-const SOME_DEBUG_FLAGS =   PERSIST2__ | PERSIST__TR2 | ALWAYS_
+const SOME_DEBUG_FLAGS =   INTERP__TRF | ALWAYS_
 
 // THIS WAS MOST RECENT
+// const SOME_DEBUG_FLAGS =   PERSIST2__ | PERSIST__TR2 | ALWAYS_
+
+// THIS WAS NEXT MOST RECENT
 // const SOME_DEBUG_FLAGS =   PERSIST2__ | PERSIST__TR2 | GC__ | ALWAYS_
 
 // const SOME_DEBUG_FLAGS =   INTERP_TR | GC__ | ALWAYS_
