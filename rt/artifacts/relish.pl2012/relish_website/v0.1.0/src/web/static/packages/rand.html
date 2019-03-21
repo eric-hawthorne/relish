@@ -1,0 +1,195 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<title>
+rand - the relish programming language
+</title>
+
+<meta name="keywords" content="relish programming language web application development framework persistence" />
+ <meta name="description" content="Home page for relish(TM), an application programming language which includes a simple full-stack web application framework and transparent persistence. Focus is on simplicity and minimalism via very strict enforcement of conventions. The name comes from the language's inbuilt construct of relations between datatypes. A programmer can express an entity-relation model of the application domain directly in the language then associate instances. Methods are owned by tuples of datatypes, and are dispatched by multi-argument multimethod dispatch.
+relish is implemented in Go, and inherits/wraps some Go features like goroutine concurrency and channels, but is almost entirely unlike Go in language constructs and philosophy." />
+ 
+
+ <link rel="stylesheet" type="text/css" id="stylesheet"
+       href="/styles/default.css" />
+
+
+</head>
+<body>
+  <div id="header">	
+  <table>
+	<tr>
+	  <td>	
+        <a href="/"><img src="/relish_logo4_small.png"></a>
+      </td>
+	  <td>	
+         &nbsp; &nbsp;
+      </td>
+	  <td>	
+        <h1><a href="/">relish<span class="trademark">&#8482;</span></a></h1>
+      </td>
+	  <td style="width: 4em">	
+         &nbsp; &nbsp;
+      </td>
+	  <td>	
+        <h2>Package rand</h2>
+
+      </td>
+    </tr>
+  </table>
+  </div>
+  <a id="tutorials_button" class="menubutton" href="/tutorials/">
+	Tutorials
+  </a>
+  <a id="references_button" class="menubutton" href="/references/">
+	References
+  </a>
+  <a id="packages_button" class="menubutton" href="/packages/">
+	Packages
+  </a>
+  <a id="shared_button" class="menubutton" href="http://shared.relish.pl">
+	Artifacts
+  </a>
+  <a id="download_button" class="menubutton" href="/download/">
+	DOWNLOAD
+  </a>	
+<div id="index">
+	<a href="#Summary" class="alt">Summary</a><br/>	
+	<a href="#expFloat">expFloat</a><br/>
+	<a href="#float" class="alt">float</a><br/>
+	<a href="#int">int</a><br/>	
+	<a href="#intn" class="alt">intn</a><br/>	
+	<a href="#normFloat">normFloat</a><br/>			
+  <a href="#seed" class="alt">seed</a><br/>   
+  <a href="#uint32">uint32</a><br/>
+  <a href="#uint" class="alt">uint</a><br/>
+</div>  
+<div id="content_manual">
+<a name="Summary"><h3>Summary</h3></a>
+<p>
+Methods which pseudo-random numeric values. Not suitable for use in cryptography.
+</p>
+<p>
+This is a wrapping of a subset of the Go math/rand package.
+</p>	
+	<center>
+<table>
+<tr>
+   <td><a href="#expFloat">expFloat</a></td><td> - returns values from an exponential distribution</td>
+</tr>
+<tr>
+   <td><a href="#float">float</a></td><td> - pseudo-random numbers in [0.0,1.0) </td>
+</tr>
+<tr> 
+   <td><a href="#int">int</a></td><td> - non-negative pseudo-random 63-bit integer </td>
+</tr>
+<tr>
+   <td><a href="#intn">intn</a></td><td> - pseudo-random integers in [0,n)</td>
+</tr>
+<tr>
+   <td><a href="#normFloat">normFloat</a></td><td> normal distribution (mean = 0, stddev = 1) in [-math.MaxFloat64, +math.MaxFloat64]</td>
+</tr>
+<tr>
+   <td><a href="#seed">seed</a></td><td> - initialize the random source with seed value n</td>
+</tr>
+<tr>
+   <td><a href="#uint32">uint32</a></td><td> - pseudo-random 32 bit unsigned integer</td>
+</tr>
+<tr>
+   <td><a href="#uint">uint </a></td><td> - pseudo-random 64 bit unsigned integer</td>
+</tr>
+</table>	
+</center>
+
+<br/>
+<h3>Methods</h3>
+<code><pre>
+
+<a name="expFloat">expFloat > Float</a>
+"""
+ Returns an exponentially distributed Float in the range (0, +math.MaxFloat64] 
+ with an exponential distribution whose rate parameter (lambda) is 1 and whose mean is 1/lambda (1) from the default Source. 
+ To produce a distribution with a different rate parameter, callers can adjust the output using:
+
+ sample = div rand.expFloat desiredRateParameter
+"""
+
+
+<a name="float">float > Float</a>
+"""
+ Returns, as a Float, a pseudo-random number in [0.0,1.0) from the default Source.
+
+ val = rand.float
+"""
+ 
+
+<a name="int">int > Int</a>
+"""
+ Returns a non-negative pseudo-random 63-bit integer as an Int from the default Source.
+
+ val = rand.int
+"""
+
+
+<a name="intn">intn n Int > Int</a>  
+"""
+ Returns, as an Int, a non-negative pseudo-random number in [0,n) from the default Source. It panics if n <= 0.
+
+ val = int 10
+"""
+
+
+<a name="normFloat">normFloat > Float</a>
+"""
+ Returns a normally distributed Float in the range [-math.MaxFloat64, +math.MaxFloat64] 
+ with standard normal distribution (mean = 0, stddev = 1) from the default Source. 
+ To produce a different normal distribution, callers can adjust the output using:
+
+ sample = plus (times rand.normFloat desiredStdDev) desiredMean
+"""
+
+
+
+<a name="seed">seed n Int</a>
+"""
+ Uses the provided seed value to initialize the default Source to a deterministic state. 
+ If seed is not called, the generator behaves as if seeded by seed 1. 
+ Seed values that have the same remainder when divided by 2^31-1 generate the same pseudo-random sequence. 
+ seed is safe for concurrent use.
+"""
+
+
+<a name="uint32">uint32 > Uint32</a>  
+"""
+ returns a pseudo-random 32-bit value as a Uint32 from the default Source.
+
+ val = rand.uint32
+"""
+
+
+<a name="uint">uint > Uint</a>
+"""
+ uint returns a pseudo-random 64-bit value as a Uint from the default Source.
+
+ val = rand.uint
+"""
+
+</pre></code>
+
+
+</div>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-1258183-3', 'auto');
+  ga('send', 'pageview');
+
+</script>
+</body>
+</html>
+ 
