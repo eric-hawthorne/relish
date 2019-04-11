@@ -14,6 +14,7 @@ import (
 	. "relish/runtime/data"
 	"strconv"
 	"strings"
+	"math"
 	"bytes"
 	"io"
 	"unicode/utf8"
@@ -916,6 +917,72 @@ func InitBuiltinFunctions(relishRoot string) {
 	}
 	negMethod.PrimitiveCode = builtinNeg		
 
+	logMethod, err := RT.CreateMethod("",nil,"log", []string{"p1"}, []string{"Numeric"},  []string{"Float"}, false, 0, false)
+	if err != nil {
+		panic(err)
+	}
+	logMethod.PrimitiveCode = builtinLog
+
+	log10Method, err := RT.CreateMethod("",nil,"log10", []string{"p1"}, []string{"Numeric"},  []string{"Float"}, false, 0, false)
+	if err != nil {
+		panic(err)
+	}
+	log10Method.PrimitiveCode = builtinLog10
+
+	log2Method, err := RT.CreateMethod("",nil,"log2", []string{"p1"}, []string{"Numeric"},  []string{"Float"}, false, 0, false)
+	if err != nil {
+		panic(err)
+	}
+	log2Method.PrimitiveCode = builtinLog2
+
+	floorMethod, err := RT.CreateMethod("",nil,"floor", []string{"p1"}, []string{"Numeric"},  []string{"Float"}, false, 0, false)
+	if err != nil {
+		panic(err)
+	}
+	floorMethod.PrimitiveCode = builtinFloor
+
+	ceilMethod, err := RT.CreateMethod("",nil,"ceil", []string{"p1"}, []string{"Numeric"},  []string{"Float"}, false, 0, false)
+	if err != nil {
+		panic(err)
+	}
+	ceilMethod.PrimitiveCode = builtinCeil
+
+	truncMethod, err := RT.CreateMethod("",nil,"trunc", []string{"p1"}, []string{"Numeric"},  []string{"Float"}, false, 0, false)
+	if err != nil {
+		panic(err)
+	}
+	truncMethod.PrimitiveCode = builtinTrunc
+
+	roundMethod, err := RT.CreateMethod("",nil,"round", []string{"p1"}, []string{"Numeric"},  []string{"Float"}, false, 0, false)
+	if err != nil {
+		panic(err)
+	}
+	roundMethod.PrimitiveCode = builtinRound
+
+	expMethod, err := RT.CreateMethod("",nil,"exp", []string{"p1"}, []string{"Numeric"},  []string{"Float"}, false, 0, false)
+	if err != nil {
+		panic(err)
+	}
+	expMethod.PrimitiveCode = builtinExp
+
+	sqrtMethod, err := RT.CreateMethod("",nil,"sqrt", []string{"p1"}, []string{"Numeric"},  []string{"Float"}, false, 0, false)
+	if err != nil {
+		panic(err)
+	}
+	sqrtMethod.PrimitiveCode = builtinSqrt
+
+	cbrtMethod, err := RT.CreateMethod("",nil,"cbrt", []string{"p1"}, []string{"Numeric"},  []string{"Float"}, false, 0, false)
+	if err != nil {
+		panic(err)
+	}
+	cbrtMethod.PrimitiveCode = builtinCbrt
+
+	powMethod, err := RT.CreateMethod("",nil,"pow", []string{"p1", "p2"}, []string{"Numeric", "Numeric"},  []string{"Float"}, false, 0, false)
+	if err != nil {
+		panic(err)
+	}
+	powMethod.PrimitiveCode = builtinPow	
+
 
     ////////////////////////////////////////////////////////////
     // Time and Duration functions
@@ -1629,7 +1696,7 @@ urlPathPartDecode s > String
 
 	containsRune s String r Rune > bool
 
-	count s String sep String > Int  // or Int32 or UInt or UInt32 ? Which? Why?
+	count s String sep String > Int  // or Int32 or Uint or Uint32 ? Which? Why?
 
 	equalFold s String t String > Bool
 
@@ -3394,8 +3461,8 @@ var SetOfFloatType *RType
 var ListOfIntType *RType
 var SetOfIntType *RType
 
-var ListOfUIntType *RType
-var SetOfUIntType *RType
+var ListOfUintType *RType
+var SetOfUintType *RType
 
 */
 func builtinSum(th InterpreterThread, objects []RObject) []RObject {
@@ -3708,6 +3775,276 @@ func builtinNeg(th InterpreterThread, objects []RObject) []RObject {
 }
 
 
+/*
+Natural logarithm ln(x) function. 
+Returns a Float value.
+*/
+func builtinLog(th InterpreterThread, objects []RObject) []RObject {
+	obj1 := objects[0]
+	var val RObject
+	switch obj1.(type) {
+	case Float:
+			val = Float(math.Log(float64(obj1.(Float))))
+	case Int:
+			val = Float(math.Log(float64(int64(obj1.(Int)))))
+	case Int32:
+			val = Float(math.Log(float64(int32(obj1.(Int32)))))
+	case Uint:
+			val = Float(math.Log(float64(uint64(obj1.(Uint)))))
+	case Uint32:
+			val = Float(math.Log(float64(uint32(obj1.(Uint)))))
+	default:
+		    rterr.Stop("log is not defined for argument type")
+	}
+	return []RObject{val}
+}
+
+
+/*
+Base 10 Logarithm log10 function. 
+Returns a Float value.
+*/
+func builtinLog10(th InterpreterThread, objects []RObject) []RObject {
+	obj1 := objects[0]
+	var val RObject
+	switch obj1.(type) {
+	case Float:
+			val = Float(math.Log10(float64(obj1.(Float))))
+	case Int:
+			val = Float(math.Log10(float64(int64(obj1.(Int)))))
+	case Int32:
+			val = Float(math.Log10(float64(int32(obj1.(Int32)))))
+	case Uint:
+			val = Float(math.Log10(float64(uint64(obj1.(Uint)))))
+	case Uint32:
+			val = Float(math.Log10(float64(uint32(obj1.(Uint)))))
+	default:
+		    rterr.Stop("log10 is not defined for argument type")
+	}
+	return []RObject{val}
+}
+
+/*
+Base 2 Logarithm log2 function. 
+Returns a Float value.
+*/
+func builtinLog2(th InterpreterThread, objects []RObject) []RObject {
+	obj1 := objects[0]
+	var val RObject
+	switch obj1.(type) {
+	case Float:
+			val = Float(math.Log2(float64(obj1.(Float))))
+	case Int:
+			val = Float(math.Log2(float64(int64(obj1.(Int)))))
+	case Int32:
+			val = Float(math.Log2(float64(int32(obj1.(Int32)))))
+	case Uint:
+			val = Float(math.Log2(float64(uint64(obj1.(Uint)))))
+	case Uint32:
+			val = Float(math.Log2(float64(uint32(obj1.(Uint)))))
+	default:
+		    rterr.Stop("log2 is not defined for argument type")
+	}
+	return []RObject{val}
+}
+
+
+
+// Floor
+func builtinFloor(th InterpreterThread, objects []RObject) []RObject {
+	obj1 := objects[0]
+	var val RObject
+	switch obj1.(type) {
+	case Float:
+			val = Float(math.Floor(float64(obj1.(Float))))
+	case Int:
+			val = Float(math.Floor(float64(int64(obj1.(Int)))))
+	case Int32:
+			val = Float(math.Floor(float64(int32(obj1.(Int32)))))
+	case Uint:
+			val = Float(math.Floor(float64(uint64(obj1.(Uint)))))
+	case Uint32:
+			val = Float(math.Floor(float64(uint32(obj1.(Uint)))))
+	default:
+		    rterr.Stop("floor is not defined for argument type")
+	}
+	return []RObject{val}
+}
+
+// Ceil
+func builtinCeil(th InterpreterThread, objects []RObject) []RObject {
+	obj1 := objects[0]
+	var val RObject
+	switch obj1.(type) {
+	case Float:
+			val = Float(math.Ceil(float64(obj1.(Float))))
+	case Int:
+			val = Float(math.Ceil(float64(int64(obj1.(Int)))))
+	case Int32:
+			val = Float(math.Ceil(float64(int32(obj1.(Int32)))))
+	case Uint:
+			val = Float(math.Ceil(float64(uint64(obj1.(Uint)))))
+	case Uint32:
+			val = Float(math.Ceil(float64(uint32(obj1.(Uint)))))
+	default:
+		    rterr.Stop("ceil is not defined for argument type")
+	}
+	return []RObject{val}
+}
+
+// Trunc
+func builtinTrunc(th InterpreterThread, objects []RObject) []RObject {
+	obj1 := objects[0]
+	var val RObject
+	switch obj1.(type) {
+	case Float:
+			val = Float(math.Trunc(float64(obj1.(Float))))
+	case Int:
+			val = Float(math.Trunc(float64(int64(obj1.(Int)))))
+	case Int32:
+			val = Float(math.Trunc(float64(int32(obj1.(Int32)))))
+	case Uint:
+			val = Float(math.Trunc(float64(uint64(obj1.(Uint)))))
+	case Uint32:
+			val = Float(math.Trunc(float64(uint32(obj1.(Uint)))))
+	default:
+		    rterr.Stop("trunc is not defined for argument type")
+	}
+	return []RObject{val}
+}
+
+// Round
+func builtinRound(th InterpreterThread, objects []RObject) []RObject {
+	obj1 := objects[0]
+	var val RObject
+	switch obj1.(type) {
+	case Float:
+			val = Float(mathRound(float64(obj1.(Float))))
+	case Int:
+			val = Float(mathRound(float64(int64(obj1.(Int)))))
+	case Int32:
+			val = Float(mathRound(float64(int32(obj1.(Int32)))))
+	case Uint:
+			val = Float(mathRound(float64(uint64(obj1.(Uint)))))
+	case Uint32:
+			val = Float(mathRound(float64(uint32(obj1.(Uint)))))
+	default:
+		    rterr.Stop("round is not defined for argument type")
+	}
+	return []RObject{val}
+}
+
+/*
+For golang version less than 1.10
+*/
+func mathRound(x float64) float64 {
+
+	if x >= 0 {
+		x += 0.5
+	} else {
+	   x -= 0.5
+	}
+	return math.Trunc(x)
+}
+
+/*
+x raised to the power y
+*/
+func builtinPow(th InterpreterThread, objects []RObject) []RObject {
+	obj1 := objects[0]
+	obj2 := objects[1]
+	x := castToFloat64(obj1,"pow")
+	y := castToFloat64(obj2,"pow")
+
+	return []RObject{Float(math.Pow(x,y))}
+}
+
+/*
+Helper - typecasts a Number to a float64
+*/
+func castToFloat64(obj1 RObject, funName string) (val float64) {
+	switch obj1.(type) {
+		case Float:
+			val = float64(obj1.(Float))
+		case Int:
+			val = float64(int64(obj1.(Int)))
+		case Int32:
+			val = float64(int32(obj1.(Int32)))
+		case Uint:
+			val = float64(uint64(obj1.(Uint)))
+		case Uint32:
+			val = float64(uint32(obj1.(Uint32)))
+		default:
+		    rterr.Stop(funName + ": argument must be Float but cannot be cast to a Float")
+		}
+
+	return val
+}
+
+
+
+// Exp 
+func builtinExp(th InterpreterThread, objects []RObject) []RObject {
+	obj1 := objects[0]
+	var val RObject
+	switch obj1.(type) {
+	case Float:
+			val = Float(math.Exp(float64(obj1.(Float))))
+	case Int:
+			val = Float(math.Exp(float64(int64(obj1.(Int)))))
+	case Int32:
+			val = Float(math.Exp(float64(int32(obj1.(Int32)))))
+	case Uint:
+			val = Float(math.Exp(float64(uint64(obj1.(Uint)))))
+	case Uint32:
+			val = Float(math.Exp(float64(uint32(obj1.(Uint)))))
+	default:
+		    rterr.Stop("exp is not defined for argument type")
+	}
+	return []RObject{val}
+}
+
+// Sqrt
+func builtinSqrt(th InterpreterThread, objects []RObject) []RObject {
+	obj1 := objects[0]
+	var val RObject
+	switch obj1.(type) {
+	case Float:
+			val = Float(math.Sqrt(float64(obj1.(Float))))
+	case Int:
+			val = Float(math.Sqrt(float64(int64(obj1.(Int)))))
+	case Int32:
+			val = Float(math.Sqrt(float64(int32(obj1.(Int32)))))
+	case Uint:
+			val = Float(math.Sqrt(float64(uint64(obj1.(Uint)))))
+	case Uint32:
+			val = Float(math.Sqrt(float64(uint32(obj1.(Uint)))))
+	default:
+		    rterr.Stop("sqrt is not defined for argument type")
+	}
+	return []RObject{val}
+}
+
+// Cbrt
+func builtinCbrt(th InterpreterThread, objects []RObject) []RObject {
+	obj1 := objects[0]
+	var val RObject
+	switch obj1.(type) {
+	case Float:
+			val = Float(math.Cbrt(float64(obj1.(Float))))
+	case Int:
+			val = Float(math.Cbrt(float64(int64(obj1.(Int)))))
+	case Int32:
+			val = Float(math.Cbrt(float64(int32(obj1.(Int32)))))
+	case Uint:
+			val = Float(math.Cbrt(float64(uint64(obj1.(Uint)))))
+	case Uint32:
+			val = Float(math.Cbrt(float64(uint32(obj1.(Uint)))))
+	default:
+		    rterr.Stop("cbrt is not defined for argument type")
+	}
+	return []RObject{val}
+}
 
 ////////////////////////////////////////////////////////////
 // Time and Duration functions
