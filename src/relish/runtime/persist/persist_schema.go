@@ -405,32 +405,40 @@ func (db *SqliteDBThread) EnsurePrimitiveCollectionTable(table string, isMap boo
 
    Return metadata about the collection, including the table name.
 */
-func (db *SqliteDBThread) EnsureCollectionTable(collection RCollection) (table string, isMap bool, isOrdered bool, keyType *RType, elementType *RType, err error) {
+func (db *SqliteDBThread) EnsureCollectionTable(collection RCollection) (table string, isMap bool, isOrdered bool, keyType *RType, valType *RType, err error) {
         
-   table, isMap, isOrdered, keyType, elementType = db.db.TypeDescriptor(collection)
+   table, isMap, isOrdered, keyType, valType = db.db.TypeDescriptor(collection)
    
-   if elementType.IsPrimitive {
-      err = db.EnsurePrimitiveCollectionTable(table, isMap, isOrdered, keyType, elementType)      
+   if valType.IsPrimitive {
+      err = db.EnsurePrimitiveCollectionTable(table, isMap, isOrdered, keyType, valType)      
    } else {
       err = db.EnsureNonPrimitiveCollectionTable(table, isMap, isOrdered, keyType)
    }
    return
 }
 
-func (db *SqliteDB) TypeDescriptor(collection RCollection) (table string, isMap bool, isOrdered bool, keyType *RType, elementType *RType) {
+/*
+   valType is the ElementType() if the collection is not a map.
+   valType is the ValType() if it is a map.
+*/
+func (db *SqliteDB) TypeDescriptor(collection RCollection) (table string, isMap bool, isOrdered bool, keyType *RType, valType *RType) {
    
    isMap = collection.IsMap()
    isSorting := collection.IsSorting()
    isOrdered = collection.IsOrdered()   
-   elementType = collection.ElementType()
+
    var typeName string
+
    if isMap {
       // isStringMap = (    collection.(Map).KeyType() == StringType  )
       
       keyType = collection.(Map).KeyType()
-      
+      valType = collection.(Map).ValType()      
+
       
       typeName = collection.Type().ShortName()
+      // fmt.Println(typeName, keyType.ShortName(), valType.ShortName(), valType.IsPrimitive)
+
       typeName = typeName[7:]
       
       
@@ -440,8 +448,10 @@ func (db *SqliteDB) TypeDescriptor(collection RCollection) (table string, isMap 
    
       
       
-   } else {
-      typeName = elementType.ShortName()
+   } else {  // The collection is not a map
+      valType = collection.ElementType()   	
+      typeName = valType.ShortName()
+
    }
    table = "["
    if isSorting {

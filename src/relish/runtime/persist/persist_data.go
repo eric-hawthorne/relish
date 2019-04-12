@@ -31,6 +31,7 @@ import (
 	"strings"
 	"time"
 	// "relish/global_loader"
+	"runtime/debug"
 	"io"
 )
 
@@ -2485,6 +2486,7 @@ func (db *SqliteDB) primitiveValSQL(val RObject) (args []interface{}) {
    		args = []interface{}{"0"}
    	}
    default:
+   	debug.PrintStack() 
    	panic(fmt.Sprintf("I don't know how to create SQL for a value of underlying type %v.", val.Type()))
    }
 	return 
