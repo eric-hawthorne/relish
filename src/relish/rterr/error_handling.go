@@ -11,7 +11,11 @@ import (
    "relish/dbg"
    "relish/compiler/ast"
    "relish/compiler/token"
+   "runtime/debug"
 )
+
+// FOR DEBUGGING relish: Set to true to enable a print of the stack to stderr after reporting the error message.
+const STACKTRACE = false
 
 /*
    An entity that is located in a relish source code file, and can return a reference to the ast.File node
@@ -31,6 +35,9 @@ then exits the relish process with status 1 (meaning abnormal exit as opposed to
 */
 func Stop(errorMessage interface{}) {
 	fmt.Fprintln(os.Stdout, "Runtime Error:", errorMessage)
+	if STACKTRACE {
+    	debug.PrintStack()
+    }
 	os.Exit(1)
 }
 
@@ -48,6 +55,9 @@ func Stop1(cfl CodeFileLocated, p Positioned, errorMessage interface{}) {
 	position := file.Position(p.Pos())	
 	errorMsgStr = dbg.FmtErr(position, errorMsgStr)
 	fmt.Fprintln(os.Stdout,errorMsgStr)
+	if STACKTRACE {
+    	debug.PrintStack()
+	}
 	os.Exit(1)
 }
 
@@ -60,6 +70,9 @@ func Stopf(errorMessage string, args ...interface{}) {
 	errorMessage = "Runtime Error: " + errorMessage 
 	fmt.Fprintf(os.Stdout, errorMessage, args...)
 	fmt.Fprintln(os.Stdout)
+	if STACKTRACE {
+    	debug.PrintStack()
+	}
 	os.Exit(1)
 }
 
@@ -78,5 +91,8 @@ func Stopf1(cfl CodeFileLocated, p Positioned, errorMessage string, args ...inte
 	position := file.Position(p.Pos())	
 	errorMessage = dbg.FmtErr(position, errorMessage)
 	fmt.Fprintln(os.Stdout, errorMessage)
+	if STACKTRACE {
+    	debug.PrintStack()
+	}
 	os.Exit(1)
 }
