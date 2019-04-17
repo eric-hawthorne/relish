@@ -586,7 +586,9 @@ func (rt *RuntimeEnv) AttrValue(th InterpreterThread, obj RObject, attr *Attribu
 
     if ! attr.PublicReadable {
     	if t.Package != th.Package() {
-	       panic(fmt.Sprintf("Attribute %s.%s is private; not readable outside of the package in which the attribute is declared.", obj, attr.Part.Name))		    		
+    		if th.Package() != rt.InbuiltFunctionsPackage {  // Allow builtin functions to access private attributes.
+	        	panic(fmt.Sprintf("Attribute %s.%s is private; not readable outside of the package in which the attribute is declared.", obj, attr.Part.Name))	
+	       	}	    		
     	}
     }
 
