@@ -17,6 +17,7 @@ import (
 	"sync"
 	"strings"
 	"errors"
+	// "runtime/debug"
 )
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -752,9 +753,17 @@ func (rt *RuntimeEnv) SetAttr(th InterpreterThread, obj RObject, attr *Attribute
     }
 
 	if typeCheck {
+
+       // No. This should have been deproxified already!!
+       //if val.IsProxy() {
+       //
+       //}
+
         // This is a kludge
         if attr.Part.CollectionType != "" { // "list", "sortedlist","set", "sortedset", "map", "stringmap", "sortedmap","sortedstringmap" ""
+           
            valType := val.Type()
+
            if valType.ElementType() != attr.Part.Type {
  		      err = fmt.Errorf("Cannot assign  '%v.%v %s of %v' a value of type '%v'.", obj.Type(), attr.Part.Name, attr.Part.CollectionType, attr.Part.Type, val.Type())
 		      return          	
@@ -781,6 +790,7 @@ func (rt *RuntimeEnv) SetAttr(th InterpreterThread, obj RObject, attr *Attribute
            	}
        	} else if !val.Type().LessEq(attr.Part.Type) {
 		   err = fmt.Errorf("Cannot assign  '%v.%v %v' a value of type '%v'.", obj.Type(), attr.Part.Name, attr.Part.Type, val.Type())
+		   // debug.PrintStack()
 		   return
 	   }
 	}

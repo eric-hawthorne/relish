@@ -1412,7 +1412,7 @@ func AttrVal(attrName string, obj RObject) (val RObject, err error) {
 		}   
 		key := String(attrName) 
 		var found bool
-		val, found = theMap.Get(key) 
+		val, found = theMap.Get(responseProcessingThread, key) 
         if ! found {
            return nil,fmt.Errorf("template error: Map has no value for the key \"%s\".",attrName) 
         }

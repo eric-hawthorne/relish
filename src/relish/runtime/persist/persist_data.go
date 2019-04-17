@@ -31,7 +31,7 @@ import (
 	"strings"
 	"time"
 	// "relish/global_loader"
-	"runtime/debug"
+	// "runtime/debug"
 	"io"
 )
 
@@ -273,8 +273,8 @@ func (db *SqliteDBThread) PersistAttributesAndRelations(th InterpreterThread, ob
 				isMap := collection.IsMap()
 				if isMap {
 					theMap := collection.(Map)
-					for key := range theMap.Iter(nil) {
-						val, _ := theMap.Get(key)
+					for key := range theMap.Iter(th) {
+						val, _ := theMap.Get(th, key)
 						err = db.EnsurePersisted(th, val)
 						if err != nil {
 							return
@@ -301,7 +301,7 @@ func (db *SqliteDBThread) PersistAttributesAndRelations(th InterpreterThread, ob
 					}
 				} else {
 					i := 0
-					for val := range collection.Iter(nil) {
+					for val := range collection.Iter(th) {
 						err = db.EnsurePersisted(th, val)
 						if err != nil {
 							return
@@ -364,8 +364,8 @@ func (db *SqliteDBThread) PersistAttributesAndRelations(th InterpreterThread, ob
 				   
 				   
 					theMap := collection.(Map)
-					for key := range theMap.Iter(nil) {
-						val, _ := theMap.Get(key)
+					for key := range theMap.Iter(th) {
+						val, _ := theMap.Get(th, key)
 
 						if attr.Part.CollectionType == "stringmap" || attr.Part.CollectionType == "orderedstringmap" {
 						    stmt := Stmt(fmt.Sprintf("INSERT INTO %s(id,%s,key1) VALUES(?,%s,?)", table, valCols, valVars)) 
@@ -401,7 +401,7 @@ func (db *SqliteDBThread) PersistAttributesAndRelations(th InterpreterThread, ob
 					}
 				} else {
 					i := 0					
-					for val := range collection.Iter(nil) {
+					for val := range collection.Iter(th) {
 						
 						if collection.IsOrdered() {					   
 							stmt := Stmt(fmt.Sprintf("INSERT INTO %s(id,%s,ord1) VALUES(?,%s,?)", table, valCols, valVars))
@@ -461,8 +461,8 @@ func (db *SqliteDBThread) PersistAttributesAndRelations(th InterpreterThread, ob
 					isMap := collection.IsMap()
 					if isMap {
 						theMap := collection.(Map)
-						for key := range theMap.Iter(nil) {
-							val, _ := theMap.Get(key)
+						for key := range theMap.Iter(th) {
+							val, _ := theMap.Get(th, key)
 							err = db.EnsurePersisted(th, val)
 							if err != nil {
 								return
@@ -489,7 +489,7 @@ func (db *SqliteDBThread) PersistAttributesAndRelations(th InterpreterThread, ob
 						}
 					} else {
 						i := 0
-						for val := range collection.Iter(nil) {
+						for val := range collection.Iter(th) {
 							err = db.EnsurePersisted(th, val)
 							if err != nil {
 								return
@@ -543,8 +543,8 @@ func (db *SqliteDBThread) PersistAttributesAndRelations(th InterpreterThread, ob
 					   
 					   
 		   				theMap := collection.(Map)
-		   				for key := range theMap.Iter(nil) {
-		   					val, _ := theMap.Get(key)
+		   				for key := range theMap.Iter(th) {
+		   					val, _ := theMap.Get(th, key)
 
 		   					if attr.Part.CollectionType == "stringmap" || attr.Part.CollectionType == "orderedstringmap" {
 		   						stmt := Stmt(fmt.Sprintf("INSERT INTO %s(id,%s,key1) VALUES(?,%s,?)", table, valCols, valVars))
@@ -580,7 +580,7 @@ func (db *SqliteDBThread) PersistAttributesAndRelations(th InterpreterThread, ob
 		   				}
 		   			} else {
 		   				i := 0					
-		   				for val := range collection.Iter(nil) {
+		   				for val := range collection.Iter(th) {
 							
 		   					if collection.IsOrdered() {					   
 		   						stmt := Stmt(fmt.Sprintf("INSERT INTO %s(id,%s,ord1) VALUES(?,%s,?)", table, valCols, valVars))
@@ -662,8 +662,8 @@ func (db *SqliteDBThread) persistCollection(th InterpreterThread, collection RCo
 			mapStmt := Stmt(fmt.Sprintf("INSERT INTO %s(id0,id1,ord1) VALUES(?,?,?)", table))		
 			stringMapStmt := Stmt(fmt.Sprintf("INSERT INTO %s(id0,id1,key1) VALUES(?,?,?)", table)) 	
 
-			for key := range theMap.Iter(nil) {
-				val, _ := theMap.Get(key)
+			for key := range theMap.Iter(th) {
+				val, _ := theMap.Get(th, key)
 				err = db.EnsurePersisted(th, val)
 				if err != nil {
 					return
@@ -713,7 +713,7 @@ func (db *SqliteDBThread) persistCollection(th InterpreterThread, collection RCo
 			unorderedStmt := Stmt(fmt.Sprintf("INSERT INTO %s(id0,id1) VALUES(?,?)", table))	
 
 			i := 0
-			for val := range collection.Iter(nil) {
+			for val := range collection.Iter(th) {
 				err = db.EnsurePersisted(th, val)
 				if err != nil {
 					return
@@ -763,8 +763,8 @@ func (db *SqliteDBThread) persistCollection(th InterpreterThread, collection RCo
    		stringMapStmt := Stmt(fmt.Sprintf("INSERT INTO %s(%s,id,key1) VALUES(%s,?,?)", table, valCols, valVars)) 
         mapStmt := Stmt(fmt.Sprintf("INSERT INTO %s(%s,id,ord1) VALUES(%s,?,?)", table, valCols, valVars))
 
-   		for key := range theMap.Iter(nil) {
-   			val, _ := theMap.Get(key)
+   		for key := range theMap.Iter(th) {
+   			val, _ := theMap.Get(th, key)
    			valParts := db.db.primitiveValSQL(val) 
 
 			stmt := mapStmt			 
@@ -814,7 +814,7 @@ func (db *SqliteDBThread) persistCollection(th InterpreterThread, collection RCo
    		unorderedStmt := Stmt(fmt.Sprintf("INSERT INTO %s(%s,id) VALUES(%s,?)", table, valCols, valVars))		
 
    		i := 0					
-   		for val := range collection.Iter(nil) {
+   		for val := range collection.Iter(th) {
    			valParts := db.db.primitiveValSQL(val) 			
    			if isOrdered {					   
    				stmt := orderedStmt
@@ -1493,11 +1493,19 @@ func (db *SqliteDBThread) fetch1(query string, arg interface{}, radius int, errS
 
    if isCollection {
       collection := obj.(RCollection)
-      if collection.ElementType().IsPrimitive {
+      var isPrimitiveVals bool
+      if collection.IsMap() {
+      	  theMap := obj.(Map)
+      	  isPrimitiveVals = theMap.ValType().IsPrimitive
+      } else {
+      	  isPrimitiveVals = collection.ElementType().IsPrimitive 
+      }
+
+      if isPrimitiveVals {
    	   err = db.fetchPrimitiveValueCollection(collection, obj.DBID(), typeName)	   
          if err != nil {
          	return
-         }	          
+         }	 
       } else {
       	err = db.fetchCollection(collection,  obj.DBID(), typeName, radius)	   
          if err != nil {
@@ -2486,7 +2494,7 @@ func (db *SqliteDB) primitiveValSQL(val RObject) (args []interface{}) {
    		args = []interface{}{"0"}
    	}
    default:
-   	debug.PrintStack() 
+   	// debug.PrintStack() 
    	panic(fmt.Sprintf("I don't know how to create SQL for a value of underlying type %v.", val.Type()))
    }
 	return 

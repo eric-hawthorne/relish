@@ -783,7 +783,7 @@ func (i *Interpreter) EvalIndexExpr(t *Thread, idxExpr *ast.IndexExpr) {
 
    	   var found bool
    	   theMap := collection.(Map)
-         val,found = theMap.Get(idx) 
+         val,found = theMap.Get(t, idx) 
 
         t.PopN(2) // Pop off the collection and its index
 
@@ -2250,7 +2250,7 @@ func (i *Interpreter) ExecForRangeStatement(t *Thread, stmt *ast.RangeStatement)
 			// Fetch the map value for the key 	
 
 			mapColl := collection.(Map)
-			obj, _ := mapColl.Get(key) // TODO Implement Get!!!!!!!!!!!!	
+			obj, _ := mapColl.Get(t, key) // TODO Implement Get!!!!!!!!!!!!	
 
 			// Assign to the value variable
 
@@ -2304,7 +2304,7 @@ func (i *Interpreter) ExecForRangeStatement(t *Thread, stmt *ast.RangeStatement)
 
 					valVar := stmt.KeyAndValues[1].(*ast.Ident)
 					LogM(t, INTERP2_, "for range assignment base %d varname %s offset %d\n", t.Base, valVar.Name, valVar.Offset)
-					t.Stack[t.Base+valVar.Offset],_ = theMap.Get(key)
+					t.Stack[t.Base+valVar.Offset],_ = theMap.Get(t, key)
 
 					// Execute loop body	
 
@@ -2626,7 +2626,7 @@ func (i *Interpreter) ExecForRangeStatement(t *Thread, stmt *ast.RangeStatement)
 
 					  collPos := stackPosBefore + 1
 					  mapColl := t.Stack[collPos].(Map)
-				      obj,_ = mapColl.Get(key)		       // TODO Implement Get!!!!!!!!!!!!	
+				      obj,_ = mapColl.Get(t, key)		       // TODO Implement Get!!!!!!!!!!!!	
 
 		              valVar := stmt.KeyAndValues[2].(*ast.Ident)	
 				      Log(INTERP2_,"for range assignment base %d varname %s offset %d\n",t.Base,valVar.Name,valVar.Offset)
@@ -2659,7 +2659,7 @@ func (i *Interpreter) ExecForRangeStatement(t *Thread, stmt *ast.RangeStatement)
 				       case 2: // Collection must be an OrderedMap
 					      key = obj
 						  mapColl := t.Stack[collPos].(Map)
-					      obj,_ = mapColl.Get(key)
+					      obj,_ = mapColl.Get(t, key)
 
 					      stmt.KeyAndValues[0]   // assign it Int(idx)
 					      stmt.KeyAndValues[1]   // assign it key
@@ -3192,7 +3192,7 @@ func (i *Interpreter) ExecAssignmentStatement(t *Thread, stmt *ast.AssignmentSta
 	               				   
 					case token.ADD_ASSIGN:
 					   
-						attrVal,found := theMap.Get(idx)					   
+						attrVal,found := theMap.Get(t, idx)					   
 						 
 						if ! found {               	
 						 rterr.Stopf1(t,indexExpr,"Can't add to collection. %s[%s] has not been assigned a collection yet.", indexExpr.X, indexExpr.Index)	
@@ -3221,7 +3221,7 @@ func (i *Interpreter) ExecAssignmentStatement(t *Thread, stmt *ast.AssignmentSta
 			
 					case token.SUB_ASSIGN:
 					   
-						attrVal,found := theMap.Get(idx)					   
+						attrVal,found := theMap.Get(t, idx)					   
 						 
 						if ! found {					                	
 						 rterr.Stopf1(t,indexExpr,"Can't remove from collection. %s[%s] has not been assigned a collection yet.", indexExpr.X, indexExpr.Index)	

@@ -192,7 +192,7 @@ type Map interface {
 	RemovableMixin
 	KeyType() *RType
 	ValType() *RType
-	Get(key RObject) (val RObject, found bool)
+	Get(th InterpreterThread, key RObject) (val RObject, found bool)
 	Put(key RObject, val RObject, context MethodEvaluationContext) (added bool, newLen int)
 
 	/*
@@ -381,7 +381,7 @@ func (c *rcollection) ToMapListTree(th InterpreterThread, includePrivate bool, v
 		tree = resultMap
 	} else {
 		resultSlice := make([]interface{},0)
-		for value := range coll.Iter(nil) {
+		for value := range coll.Iter(th) {
             if visited[value] {
 	           continue
             }			
@@ -1990,9 +1990,24 @@ func (s rstringmap) ValType() *RType {
 	return s.valType
 }
 
-func (s *rstringmap) Get(key RObject) (val RObject, found bool) {
+func (s *rstringmap) Get(th InterpreterThread, key RObject) (val RObject, found bool) {
 	k := string(key.(String))
 	val, found = s.m[k]
+
+    if found {
+		if val.IsProxy() {
+			var err error
+			proxy := val.(Proxy)
+			val, err = th.DBT().Fetch(int64(proxy), 0)
+			if err != nil {
+				panic(fmt.Sprintf("Error fetching map value [%s]: %s", key, err))
+			}
+	        // Replace the proxy in the map by the real object.
+
+	        s.m[k] = val	
+		}
+	}
+
 	return
 }
 
@@ -2134,7 +2149,7 @@ func (s ruint64map) ValType() *RType {
 	return s.valType
 }
 
-func (s *ruint64map) Get(key RObject) (val RObject, found bool) {
+func (s *ruint64map) Get(th InterpreterThread, key RObject) (val RObject, found bool) {
     var k uint64
 	switch key.(type) {
 	   case Uint:	
@@ -2149,6 +2164,21 @@ func (s *ruint64map) Get(key RObject) (val RObject, found bool) {
 	     rterr.Stop("Invalid type for map key.")     
 	} 
 	val, found = s.m[k]
+
+    if found {
+		if val.IsProxy() {
+			var err error
+			proxy := val.(Proxy)
+			val, err = th.DBT().Fetch(int64(proxy), 0)
+			if err != nil {
+				panic(fmt.Sprintf("Error fetching map value [%v]: %s", k, err))
+			}
+	        // Replace the proxy in the map by the real object.
+
+	        s.m[k] = val	
+		}
+	}
+
 	return
 }
 
@@ -2175,7 +2205,7 @@ func (s *ruint64map) Put(key RObject, val RObject, context MethodEvaluationConte
 }
 
 func (s *ruint64map) Contains(th InterpreterThread, key RObject) (found bool) {
-	_,found = s.Get(key)
+	_,found = s.Get(th, key)
 	return
 }
 
@@ -2310,7 +2340,7 @@ func (s rint64map) ValType() *RType {
 	return s.valType
 }
 
-func (s *rint64map) Get(key RObject) (val RObject, found bool) {
+func (s *rint64map) Get(th InterpreterThread, key RObject) (val RObject, found bool) {
     var k int64
 	switch key.(type) {
 	   case Int:	
@@ -2325,6 +2355,21 @@ func (s *rint64map) Get(key RObject) (val RObject, found bool) {
 	     rterr.Stop("Invalid type for map key.")     
 	} 
 	val, found = s.m[k]
+
+	if found {
+		if val.IsProxy() {
+			var err error
+			proxy := val.(Proxy)
+			val, err = th.DBT().Fetch(int64(proxy), 0)
+			if err != nil {
+				panic(fmt.Sprintf("Error fetching map value [%v]: %s", k, err))
+			}
+	        // Replace the proxy in the map by the real object.
+
+	        s.m[k] = val	
+		}
+	}
+
 	return
 }
 
@@ -2351,7 +2396,7 @@ func (s *rint64map) Put(key RObject, val RObject, context MethodEvaluationContex
 }
 
 func (s *rint64map) Contains(th InterpreterThread, key RObject) (found bool) {
-	_,found = s.Get(key)
+	_,found = s.Get(th, key)
 	return
 }
 
@@ -2487,8 +2532,25 @@ func (s rpointermap) ValType() *RType {
 	return s.valType
 }
 
-func (s *rpointermap) Get(key RObject) (val RObject, found bool) {
+func (s *rpointermap) Get(th InterpreterThread, key RObject) (val RObject, found bool) {
+
+	// TODO !!! What do we do if the key is a proxy here?
 	val, found = s.m[key]
+
+    if found {
+		if val.IsProxy() {
+			var err error
+			proxy := val.(Proxy)
+			val, err = th.DBT().Fetch(int64(proxy), 0)
+			if err != nil {
+				panic(fmt.Sprintf("Error fetching map value [%s]: %s", key, err))
+			}
+	        // Replace the proxy in the map by the real object.
+
+	        s.m[key] = val	
+		}
+	}
+
 	return
 }
 

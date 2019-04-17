@@ -6294,7 +6294,7 @@ func builtinHttpPost(th InterpreterThread, objects []RObject) []RObject {
 		values := url.Values{}
 	    for key := range theMap.Iter(th) {
 		   keyStr := string(key.(String))
-		   val, _ := theMap.Get(key)	
+		   val, _ := theMap.Get(th, key)	
 	       if val.IsCollection() {
 			    coll := val.(RCollection)
 			    for obj := range coll.Iter(th) {

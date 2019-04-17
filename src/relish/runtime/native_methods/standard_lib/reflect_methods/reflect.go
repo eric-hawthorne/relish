@@ -1534,7 +1534,7 @@ func getCollectionInfo1(th InterpreterThread, coll RCollection) (collectionKind 
        keyIsObject = ! theMap.KeyType().IsPrimitive
        for key := range coll.Iter(th) {
           keys = append(keys, key)
-       	 val,_ := theMap.Get(key)       
+       	 val,_ := theMap.Get(th, key)       
           vals = append(vals, val)           
        }  
     } else if coll.IsSet() {
